@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    <h2>Dashboard</h2>
+    <a href="{{ url_for('trips.create_trip') }}" class="btn btn-primary mb-3">Create New Trip</a>
+    <h3>My Trips</h3>
+    <div class="list-group">
+        {% for trip in trips %}
+            <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" class="list-group-item list-group-item-action">
+                {{ trip.title }}
+            </a>
+        {% else %}
+            <p>You are not a part of any trips yet.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

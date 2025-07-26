@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+    <h2>Login</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <hr>
+    <a href="{{ url_for('auth.google_login') }}" class="btn btn-danger">Login with Google</a>
+    <a href="{{ url_for('auth.admin_login') }}" class="btn btn-secondary">Admin Login</a>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Invite to {{ trip.title }}{% endblock %}
+{% block content %}
+    <h2>Invite to {{ trip.title }}</h2>
+    <form method="POST" action="{{ url_for('trips.invite_to_trip', trip_id=trip.id) }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.emails.label }}
+            {{ form.emails(class="form-control", rows=5) }}
+        </div>
+        <div class="form-group">
+            {{ form.role.label }}
+            {{ form.role(class="form-control") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+{% endblock %}

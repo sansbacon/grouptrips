@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+{% block content %}
+    <h2>Edit User: {{ user.username }}</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.username.label }}
+            {{ form.username(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.display_name.label }}
+            {{ form.display_name(class="form-control") }}
+        </div>
+        <div class="form-group form-check">
+            {{ form.is_admin(class="form-check-input") }}
+            {{ form.is_admin.label(class="form-check-label") }}
+        </div>
+        <div class="form-group form-check">
+            {{ form.is_test_user(class="form-check-input") }}
+            {{ form.is_test_user.label(class="form-check-label") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <hr>
+    <a href="{{ url_for('admin.set_user_password', user_id=user.id) }}" class="btn btn-secondary">Set Password</a>
+{% endblock %}

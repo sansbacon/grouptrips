@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}System Information{% endblock %}
+{% block content %}
+    <h2>System Information</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Database Statistics</h5>
+            <p>Total Users: {{ db_stats.users }}</p>
+            <p>Total Trips: {{ db_stats.trips }}</p>
+            <p>Total Trip Members: {{ db_stats.trip_members }}</p>
+            <p>Total Trip Invitations: {{ db_stats.trip_invitations }}</p>
+        </div>
+    </div>
+{% endblock %}

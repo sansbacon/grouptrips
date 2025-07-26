@@ -1,0 +1,11 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-Mail
+Flask-WTF
+python-dotenv
+requests
+authlib
+pytz
+sendgrid
+gunicorn

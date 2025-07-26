@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}{{ trip.title }}{% endblock %}
+{% block content %}
+    <h2>{{ trip.title }}</h2>
+    <p>{{ trip.description }}</p>
+    <p><strong>Organizer:</strong> {{ trip.organizer.username }}</p>
+    <hr>
+    <h3>Members</h3>
+    <a href="{{ url_for('trips.invite_to_trip', trip_id=trip.id) }}" class="btn btn-primary btn-sm">Invite Members</a>
+    <ul>
+        {% for member in trip.members %}
+            <li>{{ member.user.username }} ({{ member.role }})</li>
+        {% endfor %}
+    </ul>
+
+    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+    <hr>
+    <h3>Suggest a Date</h3>
+    <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+        {{ date_form.hidden_tag() }}
+        <div class="form-group">
+            {{ date_form.start_date.label }} {{ date_form.start_date(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ date_form.end_date.label }} {{ date_form.end_date(class="form-control") }}
+        </div>
+        {{ date_form.submit(class="btn btn-primary") }}
+    </form>
+    {% endif %}
+
+    <hr>
+    <h3>Suggested Dates</h3>
+    <ul>
+        {% for date in suggested_dates %}
+            <li>
+                {{ date.start_date.strftime('%Y-%m-%d') }} to {{ date.end_date.strftime('%Y-%m-%d') }} (Suggested by: {{ date.creator.username }})
+                {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                <a href="{{ url_for('trips.vote_date', suggested_date_id=date.id, vote_type='preferred') }}" class="btn btn-success btn-sm">Preferred</a>
+                <a href="{{ url_for('trips.vote_date', suggested_date_id=date.id, vote_type='available') }}" class="btn btn-info btn-sm">Available</a>
+                <a href="{{ url_for('trips.vote_date', suggested_date_id=date.id, vote_type='not_available') }}" class="btn btn-danger btn-sm">Not Available</a>
+                {% endif %}
+                <p>
+                    Votes:
+                    Preferred: {{ date.votes|selectattr('vote_type', 'equalto', 'preferred')|list|length }} |
+                    Available: {{ date.votes|selectattr('vote_type', 'equalto', 'available')|list|length }} |
+                    Not Available: {{ date.votes|selectattr('vote_type', 'equalto', 'not_available')|list|length }}
+                </p>
+                <div class="comments">
+                    <h6>Comments</h6>
+                    {% for comment in comments if comment.associated_item_type == 'suggested_date' and comment.associated_item_id == date.id %}
+                        <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
+                    {% endfor %}
+                    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                    <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+                        {{ comment_form.hidden_tag() }}
+                        {{ comment_form.associated_item_type(value='suggested_date') }}
+                        {{ comment_form.associated_item_id(value=date.id) }}
+                        <div class="form-group">
+                            {{ comment_form.content(class="form-control", rows=2) }}
+                        </div>
+                        {{ comment_form.submit(class="btn btn-secondary btn-sm") }}
+                    </form>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+    <hr>
+    <h3>Suggest a Housing Option</h3>
+    <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+        {{ housing_form.hidden_tag() }}
+        <div class="form-group">
+            {{ housing_form.name.label }} {{ housing_form.name(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ housing_form.location.label }} {{ housing_form.location(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ housing_form.estimated_price.label }} {{ housing_form.estimated_price(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ housing_form.listing_link.label }} {{ housing_form.listing_link(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ housing_form.description.label }} {{ housing_form.description(class="form-control") }}
+        </div>
+        {{ housing_form.submit(class="btn btn-primary") }}
+    </form>
+    {% endif %}
+
+    <hr>
+    <h3>Suggested Housing Options</h3>
+    <ul>
+        {% for option in housing_options %}
+            <li>
+                <strong>{{ option.name }}</strong> (Suggested by: {{ option.suggester.username }})<br>
+                Location: {{ option.location }}<br>
+                Estimated Price: ${{ option.estimated_price }}<br>
+                <a href="{{ option.listing_link }}" target="_blank">Listing Link</a><br>
+                Description: {{ option.description }}<br>
+                {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                <a href="{{ url_for('trips.vote_housing', housing_option_id=option.id, vote_type='preferred') }}" class="btn btn-success btn-sm">Preferred</a>
+                <a href="{{ url_for('trips.vote_housing', housing_option_id=option.id, vote_type='acceptable') }}" class="btn btn-info btn-sm">Acceptable</a>
+                <a href="{{ url_for('trips.vote_housing', housing_option_id=option.id, vote_type='not_acceptable') }}" class="btn btn-danger btn-sm">Not Acceptable</a>
+                {% endif %}
+                <p>
+                    Votes:
+                    Preferred: {{ option.votes|selectattr('vote_type', 'equalto', 'preferred')|list|length }} |
+                    Acceptable: {{ option.votes|selectattr('vote_type', 'equalto', 'acceptable')|list|length }} |
+                    Not Acceptable: {{ option.votes|selectattr('vote_type', 'equalto', 'not_acceptable')|list|length }}
+                </p>
+                <div class="comments">
+                    <h6>Comments</h6>
+                    {% for comment in comments if comment.associated_item_type == 'housing_option' and comment.associated_item_id == option.id %}
+                        <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
+                    {% endfor %}
+                    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                    <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+                        {{ comment_form.hidden_tag() }}
+                        {{ comment_form.associated_item_type(value='housing_option') }}
+                        {{ comment_form.associated_item_id(value=option.id) }}
+                        <div class="form-group">
+                            {{ comment_form.content(class="form-control", rows=2) }}
+                        </div>
+                        {{ comment_form.submit(class="btn btn-secondary btn-sm") }}
+                    </form>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+    <hr>
+    <h3>Suggest an Activity</h3>
+    <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+        {{ activity_form.hidden_tag() }}
+        <div class="form-group">
+            {{ activity_form.name.label }} {{ activity_form.name(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ activity_form.description.label }} {{ activity_form.description(class="form-control") }}
+        </div>
+        {{ activity_form.submit(class="btn btn-primary") }}
+    </form>
+    {% endif %}
+
+    <hr>
+    <h3>Suggested Activities</h3>
+    <ul>
+        {% for option in activity_options %}
+            <li>
+                <strong>{{ option.name }}</strong> (Suggested by: {{ option.suggester.username }})<br>
+                Description: {{ option.description }}<br>
+                {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                <a href="{{ url_for('trips.vote_activity', activity_option_id=option.id, vote_type='preferred') }}" class="btn btn-success btn-sm">Preferred</a>
+                <a href="{{ url_for('trips.vote_activity', activity_option_id=option.id, vote_type='acceptable') }}" class="btn btn-info btn-sm">Acceptable</a>
+                <a href="{{ url_for('trips.vote_activity', activity_option_id=option.id, vote_type='not_acceptable') }}" class="btn btn-danger btn-sm">Not Acceptable</a>
+                {% endif %}
+                <p>
+                    Votes:
+                    Preferred: {{ option.votes|selectattr('vote_type', 'equalto', 'preferred')|list|length }} |
+                    Acceptable: {{ option.votes|selectattr('vote_type', 'equalto', 'acceptable')|list|length }} |
+                    Not Acceptable: {{ option.votes|selectattr('vote_type', 'equalto', 'not_acceptable')|list|length }}
+                </p>
+                <div class="comments">
+                    <h6>Comments</h6>
+                    {% for comment in comments if comment.associated_item_type == 'activity_option' and comment.associated_item_id == option.id %}
+                        <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
+                    {% endfor %}
+                    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                    <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+                        {{ comment_form.hidden_tag() }}
+                        {{ comment_form.associated_item_type(value='activity_option') }}
+                        {{ comment_form.associated_item_id(value=option.id) }}
+                        <div class="form-group">
+                            {{ comment_form.content(class="form-control", rows=2) }}
+                        </div>
+                        {{ comment_form.submit(class="btn btn-secondary btn-sm") }}
+                    </form>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
