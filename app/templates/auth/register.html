@@ -1,21 +1,102 @@
 {% extends "base.html" %}
-{% block title %}Register{% endblock %}
+{% block title %}Register - Join GroupTrips{% endblock %}
 {% block content %}
-    <h2>Register</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.display_name.label }}
-            {{ form.display_name(class="form-control") }}
+    <div class="container-travel" style="padding: 2rem 0; max-width: 500px;">
+        <div class="card-travel" style="text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🚀</div>
+            <h1 style="margin-bottom: 0.5rem;">Start Your Adventure!</h1>
+            <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                Create your account and begin planning amazing group trips with friends
+            </p>
+            
+            <form method="POST" style="text-align: left;">
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group-travel">
+                    <label class="form-label-travel" for="{{ form.display_name.id }}">{{ form.display_name.label.text }}</label>
+                    {{ form.display_name(class="form-control-travel", placeholder="Enter your full name") }}
+                </div>
+                
+                <div class="form-group-travel">
+                    <label class="form-label-travel" for="{{ form.username.id }}">{{ form.username.label.text }}</label>
+                    {{ form.username(class="form-control-travel", placeholder="Choose a username") }}
+                </div>
+                
+                <div class="form-group-travel">
+                    <label class="form-label-travel" for="{{ form.email.id }}">{{ form.email.label.text }}</label>
+                    {{ form.email(class="form-control-travel", placeholder="Enter your email address") }}
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    {{ form.submit(class="btn-travel btn-primary-travel", style="width: 100%;") }}
+                </div>
+            </form>
+            
+            <div style="margin: 1.5rem 0; position: relative;">
+                <div style="border-top: 1px solid var(--gray-200); position: relative;">
+                    <span style="background: white; padding: 0 1rem; position: absolute; top: -0.5rem; left: 50%; transform: translateX(-50%); color: var(--gray-500); font-size: 0.875rem;">
+                        or continue with
+                    </span>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <a href="{{ url_for('auth.google_login') }}" class="btn-travel" style="background: #4285f4; color: white; width: 100%; justify-content: center;">
+                    🌐 Sign up with Google
+                </a>
+            </div>
+            
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200); color: var(--gray-600); font-size: 0.875rem;">
+                Already have an account? 
+                <a href="{{ url_for('auth.login') }}" style="color: var(--primary-blue); text-decoration: none; font-weight: 500;">
+                    Sign in here
+                </a>
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.username.label }}
-            {{ form.username(class="form-control") }}
+        
+        <!-- Benefits Preview -->
+        <div style="margin-top: 2rem; text-align: center;">
+            <h3 style="color: var(--gray-800); margin-bottom: 1rem;">Join Thousands of Happy Travelers</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem;">
+                <div style="padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</div>
+                    <div style="font-weight: 500; color: var(--gray-800); font-size: 0.875rem; margin-bottom: 0.25rem;">Plan Together</div>
+                    <div style="color: var(--gray-600); font-size: 0.75rem;">Coordinate with ease</div>
+                </div>
+                <div style="padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
+                    <div style="font-weight: 500; color: var(--gray-800); font-size: 0.875rem; margin-bottom: 0.25rem;">Stay Connected</div>
+                    <div style="color: var(--gray-600); font-size: 0.75rem;">Real-time updates</div>
+                </div>
+                <div style="padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">✅</div>
+                    <div style="font-weight: 500; color: var(--gray-800); font-size: 0.875rem; margin-bottom: 0.25rem;">Make Decisions</div>
+                    <div style="color: var(--gray-600); font-size: 0.75rem;">Democratic voting</div>
+                </div>
+                <div style="padding: 1rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                    <div style="font-weight: 500; color: var(--gray-800); font-size: 0.875rem; margin-bottom: 0.25rem;">Save Time</div>
+                    <div style="color: var(--gray-600); font-size: 0.75rem;">Streamlined planning</div>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            {{ form.email.label }}
-            {{ form.email(class="form-control") }}
+        
+        <!-- Trust Indicators -->
+        <div class="card-travel" style="margin-top: 2rem; background: linear-gradient(135deg, var(--gray-50), white); text-align: center; padding: 1.5rem;">
+            <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; flex-wrap: wrap; color: var(--gray-600); font-size: 0.875rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--accent-green);">🔒</span>
+                    <span>Secure & Private</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--primary-blue);">⚡</span>
+                    <span>Free to Use</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--secondary-orange);">📱</span>
+                    <span>Mobile Friendly</span>
+                </div>
+            </div>
         </div>
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
+    </div>
 {% endblock %}

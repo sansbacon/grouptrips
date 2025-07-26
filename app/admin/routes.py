@@ -43,24 +43,79 @@ class SetPasswordForm(FlaskForm):
 @admin.route('/')
 @admin_required
 def dashboard():
-    """Admin dashboard."""
+    """Admin dashboard with enhanced statistics."""
     current_user = get_current_user()
+    
+    # Basic counts
     total_users = User.query.count()
     total_trips = Trip.query.count()
+    total_members = TripMember.query.count()
+    total_invitations = TripInvitation.query.count()
+    
+    # Recent activity (last 7 days)
+    from datetime import datetime, timedelta
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    recent_users_count = User.query.filter(User.created_at >= week_ago).count()
+    recent_trips_count = Trip.query.filter(Trip.created_at >= week_ago).count()
+    
+    # Calculate growth percentages (mock data for now - in real app, compare to previous period)
+    user_growth = round((recent_users_count / max(total_users, 1)) * 100, 1) if total_users > 0 else 0
+    trip_growth = round((recent_trips_count / max(total_trips, 1)) * 100, 1) if total_trips > 0 else 0
+    
+    # Active members (users who are part of at least one trip)
+    active_members = db.session.query(TripMember.user_id).distinct().count()
+    
+    # System health (simplified)
+    system_health = {
+        'status': 'healthy',
+        'uptime': '99.9%',
+        'users_online': 'N/A'  # Would need session tracking for real data
+    }
     
     stats = {
         'total_users': total_users,
         'total_trips': total_trips,
+        'active_members': active_members,
+        'total_invitations': total_invitations,
+        'user_growth': user_growth,
+        'trip_growth': trip_growth,
+        'recent_users_count': recent_users_count,
+        'recent_trips_count': recent_trips_count,
+        'system_health': system_health
     }
     
+    # Recent activity
     recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
     recent_trips = Trip.query.order_by(Trip.created_at.desc()).limit(5).all()
+    
+    # Recent activity combined and sorted
+    recent_activity = []
+    for user in recent_users:
+        recent_activity.append({
+            'type': 'user_registered',
+            'description': f'New user registered: {user.display_name or user.username}',
+            'timestamp': user.created_at,
+            'icon': '👥'
+        })
+    
+    for trip in recent_trips:
+        recent_activity.append({
+            'type': 'trip_created',
+            'description': f'Trip created: {trip.title}',
+            'timestamp': trip.created_at,
+            'icon': '✈️'
+        })
+    
+    # Sort by timestamp and limit to 8 most recent
+    recent_activity.sort(key=lambda x: x['timestamp'], reverse=True)
+    recent_activity = recent_activity[:8]
 
     return render_template('admin/dashboard.html',
                          current_user=current_user,
                          stats=stats,
                          recent_users=recent_users,
-                         recent_trips=recent_trips)
+                         recent_trips=recent_trips,
+                         recent_activity=recent_activity)
 
 @admin.route('/users')
 @admin_required

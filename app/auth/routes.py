@@ -15,8 +15,9 @@ auth = Blueprint('auth', __name__)
 
 class LoginForm(FlaskForm):
     """Form for user login."""
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    submit = SubmitField('Send Login Link')
+    email = StringField('Email', validators=[DataRequired()])
+    password = PasswordField('Password (for local accounts)', validators=[])
+    submit = SubmitField('Login')
 
 
 class AdminLoginForm(FlaskForm):
@@ -36,23 +37,46 @@ class RegisterForm(FlaskForm):
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    """Login page - sends one-time login link via email."""
+    """Login page - handles both email-only and email+password login."""
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data.lower().strip()
+        password = form.password.data
+        
         user = User.query.filter_by(email=email).first()
         if not user:
             flash('No account found with that email address. Please register first.', 'error')
             return redirect(url_for('auth.register'))
         
-        # This part would require a LoginToken model, which we can add later.
-        # For now, we'll just log the user in directly for simplicity.
-        # In a real app, you'd generate and email a token.
-        session['user_id'] = user.id
-        session['username'] = user.username
-        session['is_admin'] = user.is_admin
-        flash('Logged in successfully!', 'success')
-        return redirect(url_for('trips.dashboard'))
+        # If password is provided, check for local account login
+        if password:
+            if user.is_local_account and user.check_password(password):
+                session['user_id'] = user.id
+                session['username'] = user.username
+                session['is_admin'] = user.is_admin
+                flash(f'Welcome back, {user.display_name}!', 'success')
+                
+                # Redirect admin users to admin dashboard, others to trips dashboard
+                if user.is_admin:
+                    return redirect(url_for('admin.dashboard'))
+                else:
+                    return redirect(url_for('trips.dashboard'))
+            else:
+                flash('Invalid email or password.', 'error')
+                return render_template('auth/login.html', form=form)
+        else:
+            # Email-only login for non-local accounts
+            if user.is_local_account:
+                flash('This account requires a password. Please enter your password.', 'error')
+                return render_template('auth/login.html', form=form)
+            
+            # This part would require a LoginToken model for email-based login
+            # For now, we'll just log the user in directly for simplicity
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['is_admin'] = user.is_admin
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('trips.dashboard'))
 
     return render_template('auth/login.html', form=form)
 
