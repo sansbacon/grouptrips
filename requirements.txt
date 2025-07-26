@@ -9,3 +9,4 @@ authlib
 pytz
 sendgrid
 gunicorn
+email_validator

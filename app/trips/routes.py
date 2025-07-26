@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, TextAreaField, SubmitField, DateField, FloatField, HiddenField, SelectField, IntegerField
@@ -476,6 +476,50 @@ def invite_to_trip(trip_id):
         flash(f"Invitations sent: {results['email_sent']} successful, {results['email_failed']} failed.", 'info')
         return redirect(url_for('trips.view_trip', trip_id=trip.id))
     return render_template('trips/invite_to_trip.html', trip=trip, form=form)
+
+@trips.route('/<int:trip_id>/invite/link', methods=['POST'])
+@login_required
+@role_required(['organizer'])
+def generate_invitation_link(trip_id):
+    """Generate a shareable invitation link for SMS or other messaging."""
+    import secrets
+    from datetime import timedelta
+    
+    trip = Trip.query.get_or_404(trip_id)
+    user_id = session['user_id']
+    
+    # Get role from request
+    role_type = request.json.get('role', 'member')
+    if role_type not in ['member', 'viewer']:
+        role_type = 'member'
+    
+    # Generate invitation code and create invitation
+    invitation_code = secrets.token_urlsafe(16)
+    expires_at = datetime.utcnow() + timedelta(days=7)
+    
+    invitation = TripInvitation(
+        trip_id=trip.id,
+        invitation_code=invitation_code,
+        role_type=role_type,
+        created_by=user_id,
+        expires_at=expires_at
+    )
+    db.session.add(invitation)
+    db.session.commit()
+    
+    # Generate the invitation URL
+    invitation_url = url_for('trips.join_trip', invitation_code=invitation_code, _external=True)
+    
+    # Create SMS message
+    user = User.query.get(user_id)
+    sms_message = f"🎉 You're invited to join '{trip.title}'!\n\n📍 {trip.destination}\n👤 Organized by {user.display_name}\n\n🔗 Join here: {invitation_url}\n\nSee you there! ✈️"
+    
+    return jsonify({
+        'success': True,
+        'invitation_url': invitation_url,
+        'sms_message': sms_message,
+        'expires_at': expires_at.strftime('%B %d, %Y')
+    })
 
 @trips.route('/join/<invitation_code>')
 @login_required

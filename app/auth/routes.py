@@ -16,22 +16,16 @@ auth = Blueprint('auth', __name__)
 class LoginForm(FlaskForm):
     """Form for user login."""
     email = StringField('Email', validators=[DataRequired()])
-    password = PasswordField('Password (for local accounts)', validators=[])
-    submit = SubmitField('Login')
-
-
-class AdminLoginForm(FlaskForm):
-    """Form for admin login with username/password."""
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    password = PasswordField('Password', validators=[])
     submit = SubmitField('Login')
 
 
 class RegisterForm(FlaskForm):
     """Form for user registration."""
     display_name = StringField('Display Name', validators=[DataRequired(), Length(min=1, max=50)])
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     submit = SubmitField('Register')
 
 
@@ -81,25 +75,6 @@ def login():
     return render_template('auth/login.html', form=form)
 
 
-@auth.route('/admin-login', methods=['GET', 'POST'])
-def admin_login():
-    """Admin login page."""
-    form = AdminLoginForm()
-    if form.validate_on_submit():
-        username = form.username.data.strip()
-        password = form.password.data
-        user = User.query.filter_by(username=username).first()
-        if user and user.is_admin and user.check_password(password):
-            session['user_id'] = user.id
-            session['username'] = user.username
-            session['is_admin'] = user.is_admin
-            flash(f'Welcome back, {user.username}!', 'success')
-            return redirect(url_for('admin.dashboard'))
-        else:
-            flash('Invalid username or password.', 'error')
-    return render_template('auth/admin_login.html', form=form)
-
-
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     """Registration page for new users."""
@@ -119,8 +94,10 @@ def register():
         user = User(
             username=username,
             email=email,
-            display_name=display_name
+            display_name=display_name,
+            is_local_account=True
         )
+        user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
 
