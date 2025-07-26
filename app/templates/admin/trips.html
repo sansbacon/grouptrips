@@ -1,38 +1,273 @@
 {% extends "base.html" %}
-{% block title %}Manage Trips{% endblock %}
+{% block title %}Manage Trips - GroupTrips Admin{% endblock %}
 {% block content %}
-    <h2>Manage Trips</h2>
-    <form method="GET" class="form-inline mb-3">
-        <input type="text" name="search" class="form-control mr-2" placeholder="Search trips..." value="{{ search }}">
-        <button type="submit" class="btn btn-primary">Search</button>
-    </form>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Organizer</th>
-                <th>Status</th>
-                <th>Created At</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for trip in trips.items %}
+<div class="container-travel" style="padding: var(--space-xl) var(--space-md);">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <h1 class="admin-page-title">✈️ Manage Trips</h1>
+        <div class="admin-search-form">
+            <form method="GET" style="display: flex; gap: var(--space-sm); align-items: center;">
+                <input type="text" 
+                       name="search" 
+                       class="admin-search-input" 
+                       placeholder="Search trips by title or organizer..." 
+                       value="{{ search or '' }}">
+                <button type="submit" class="btn-travel btn-primary-travel">
+                    🔍 Search
+                </button>
+            </form>
+            <a href="{{ url_for('trips.create_trip') }}" class="btn-travel btn-admin-add">
+                ➕ Create New Trip
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="admin-stats-summary">
+        <div class="admin-stat-item">
+            <div class="admin-stat-number">{{ trips.total }}</div>
+            <div class="admin-stat-label">Total Trips</div>
+        </div>
+        <div class="admin-stat-item" style="border-left-color: var(--secondary-orange);">
+            <div class="admin-stat-number">{{ trips.items | selectattr('status', 'equalto', 'planning') | list | length }}</div>
+            <div class="admin-stat-label">Planning</div>
+        </div>
+        <div class="admin-stat-item" style="border-left-color: var(--accent-green);">
+            <div class="admin-stat-number">{{ trips.items | selectattr('status', 'equalto', 'active') | list | length }}</div>
+            <div class="admin-stat-label">Active</div>
+        </div>
+        <div class="admin-stat-item" style="border-left-color: var(--gray-600);">
+            <div class="admin-stat-number">{{ trips.page }}</div>
+            <div class="admin-stat-label">Current Page</div>
+        </div>
+    </div>
+
+    <!-- Trips Table -->
+    {% if trips.items %}
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
                 <tr>
-                    <td>{{ trip.id }}</td>
-                    <td>{{ trip.title }}</td>
-                    <td>{{ trip.organizer.username }}</td>
-                    <td>{{ trip.status }}</td>
-                    <td>{{ trip.created_at.strftime('%Y-%m-%d') }}</td>
+                    <th>Trip Details</th>
+                    <th>Organizer</th>
+                    <th>Status</th>
+                    <th>Members</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trip in trips.items %}
+                <tr>
                     <td>
-                        <form method="POST" action="{{ url_for('admin.delete_trip', trip_id=trip.id) }}" style="display:inline;">
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
-                        </form>
+                        <div class="user-info">
+                            <div class="user-avatar" style="background: linear-gradient(135deg, var(--secondary-orange), var(--accent-green));">
+                                {{ trip.title[0].upper() }}
+                            </div>
+                            <div class="user-details">
+                                <div class="user-name">{{ trip.title }}</div>
+                                <div class="user-email">ID: {{ trip.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div style="font-weight: 500; margin-bottom: var(--space-xs);">
+                                {{ trip.organizer.display_name or trip.organizer.username }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--gray-600);">
+                                @{{ trip.organizer.username }}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if trip.status == 'planning' %}
+                            <span class="user-badge" style="background: var(--secondary-orange); color: white;">
+                                📋 Planning
+                            </span>
+                        {% elif trip.status == 'active' %}
+                            <span class="user-badge" style="background: var(--accent-green); color: white;">
+                                🌟 Active
+                            </span>
+                        {% elif trip.status == 'completed' %}
+                            <span class="user-badge" style="background: var(--primary-blue); color: white;">
+                                ✅ Completed
+                            </span>
+                        {% else %}
+                            <span class="user-badge regular">
+                                ❓ {{ trip.status|title }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-size: 0.875rem; color: var(--gray-600);">
+                            {% set member_count = trip.members|length %}
+                            {% if member_count == 0 %}
+                                No members
+                            {% elif member_count == 1 %}
+                                1 member
+                            {% else %}
+                                {{ member_count }} members
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.875rem; color: var(--gray-600);">
+                            {{ trip.created_at.strftime('%b %d, %Y') if trip.created_at else 'Unknown' }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="admin-actions">
+                            <a href="{{ url_for('trips.view_trip', trip_id=trip.id) }}" 
+                               class="btn-admin btn-admin-edit">
+                                👁️ View
+                            </a>
+                            <form method="POST" 
+                                  action="{{ url_for('admin.delete_trip', trip_id=trip.id) }}" 
+                                  style="display: inline;">
+                                <button type="submit" 
+                                        class="btn-admin btn-admin-delete" 
+                                        onclick="return confirm('Are you sure you want to delete &quot;{{ trip.title }}&quot;? This action cannot be undone.')">
+                                    🗑️ Delete
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% if trips.pages > 1 %}
+        <div class="admin-pagination">
+            {% if trips.has_prev %}
+                <a href="{{ url_for('admin.manage_trips', page=trips.prev_num, search=search) }}" 
+                   class="pagination-btn">
+                    ← Previous
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">← Previous</span>
+            {% endif %}
+
+            {% for page_num in trips.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != trips.page %}
+                        <a href="{{ url_for('admin.manage_trips', page=page_num, search=search) }}" 
+                           class="pagination-btn">
+                            {{ page_num }}
+                        </a>
+                    {% else %}
+                        <span class="pagination-btn active">{{ page_num }}</span>
+                    {% endif %}
+                {% else %}
+                    <span class="pagination-btn disabled">…</span>
+                {% endif %}
             {% endfor %}
-        </tbody>
-    </table>
-    <!-- Pagination -->
+
+            {% if trips.has_next %}
+                <a href="{{ url_for('admin.manage_trips', page=trips.next_num, search=search) }}" 
+                   class="pagination-btn">
+                    Next →
+                </a>
+            {% else %}
+                <span class="pagination-btn disabled">Next →</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="admin-table-container">
+        <div class="admin-empty-state">
+            <div class="admin-empty-state-icon">✈️</div>
+            <div class="admin-empty-state-title">
+                {% if search %}
+                    No trips found matching "{{ search }}"
+                {% else %}
+                    No trips found
+                {% endif %}
+            </div>
+            <div class="admin-empty-state-description">
+                {% if search %}
+                    Try adjusting your search terms or browse all trips.
+                {% else %}
+                    Get started by creating your first group trip.
+                {% endif %}
+            </div>
+            {% if search %}
+                <a href="{{ url_for('admin.manage_trips') }}" class="btn-travel btn-secondary-travel">
+                    View All Trips
+                </a>
+            {% else %}
+                <a href="{{ url_for('trips.create_trip') }}" class="btn-travel btn-primary-travel">
+                    Create First Trip
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Trip Status Overview -->
+    <div class="card-travel" style="margin-top: var(--space-xl);">
+        <h3 style="margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+            📊 Trip Status Overview
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-lg); text-align: center;">
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--secondary-orange);">
+                    {{ trips.items | selectattr('status', 'equalto', 'planning') | list | length }}
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">📋 Planning Phase</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--accent-green);">
+                    {{ trips.items | selectattr('status', 'equalto', 'active') | list | length }}
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">🌟 Active Trips</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue);">
+                    {{ trips.items | selectattr('status', 'equalto', 'completed') | list | length }}
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">✅ Completed</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--gray-700);">
+                    {% set total_members = 0 %}
+                    {% for trip in trips.items %}
+                        {% set total_members = total_members + (trip.members|length if trip.members else 0) %}
+                    {% endfor %}
+                    {{ total_members }}
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">👥 Total Members</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card-travel" style="margin-top: var(--space-xl);">
+        <h3 style="margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+            ⚡ Quick Actions
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+            <a href="{{ url_for('trips.create_trip') }}" class="quick-action-item">
+                <div class="quick-action-title">➕ Create New Trip</div>
+                <div class="quick-action-description">Start planning a new adventure</div>
+            </a>
+            <a href="{{ url_for('admin.manage_trips') }}" class="quick-action-item">
+                <div class="quick-action-title">🔄 Refresh List</div>
+                <div class="quick-action-description">Reload the trips table</div>
+            </a>
+            <a href="{{ url_for('admin.dashboard') }}" class="quick-action-item">
+                <div class="quick-action-title">📊 Back to Dashboard</div>
+                <div class="quick-action-description">Return to admin overview</div>
+            </a>
+            <a href="{{ url_for('trips.dashboard') }}" class="quick-action-item">
+                <div class="quick-action-title">🏠 User Dashboard</div>
+                <div class="quick-action-description">View trips from user perspective</div>
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock %}

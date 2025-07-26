@@ -3,40 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}GroupTrips{% endblock %}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>{% block title %}GroupTrips - Plan Amazing Adventures Together{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/trip-view.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('main.index') }}">GroupTrips</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                {% if session['user_id'] %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('trips.dashboard') }}">Dashboard</a></li>
-                {% endif %}
-                {% if session['is_admin'] %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a></li>
-                {% endif %}
-            </ul>
-            <ul class="navbar-nav">
-                {% if session['user_id'] %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a></li>
-                {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Register</a></li>
-                {% endif %}
-            </ul>
+    <nav class="navbar-travel">
+        <div class="container-travel">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <a class="navbar-brand-travel" href="{{ url_for('main.index') }}">GroupTrips</a>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    {% if session['user_id'] %}
+                        <a class="nav-link-travel" href="{{ url_for('trips.dashboard') }}">🏠 Dashboard</a>
+                    {% endif %}
+                    {% if session['is_admin'] %}
+                        <a class="nav-link-travel" href="{{ url_for('admin.dashboard') }}">⚙️ Admin</a>
+                    {% endif %}
+                    {% if session['user_id'] %}
+                        <a class="nav-link-travel" href="{{ url_for('auth.logout') }}">👋 Logout</a>
+                    {% else %}
+                        <a class="nav-link-travel" href="{{ url_for('auth.login') }}">🔑 Login</a>
+                        <a class="nav-link-travel" href="{{ url_for('auth.register') }}">📝 Register</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </nav>
-    <div class="container mt-4">
+    
+    <main>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
+                <div class="container-travel" style="margin-top: 1rem;">
+                    {% for category, message in messages %}
+                        <div class="alert-travel alert-{{ 'danger' if category == 'error' else category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
-    </div>
+    </main>
 </body>
 </html>

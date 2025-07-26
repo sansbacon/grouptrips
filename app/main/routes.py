@@ -4,4 +4,4 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    return "<h1>Welcome to GroupTrips!</h1>"
+    return render_template('main/index.html')

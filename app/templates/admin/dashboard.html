@@ -1,34 +1,215 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard - GroupTrips{% endblock %}
 {% block content %}
-    <h2>Admin Dashboard</h2>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Statistics</h5>
-                    <p>Total Users: {{ stats.total_users }}</p>
-                    <p>Total Trips: {{ stats.total_trips }}</p>
+<div class="container-travel admin-dashboard">
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <h1>👋 Welcome back, {{ current_user.display_name or current_user.username }}!</h1>
+        <p class="subtitle">
+            <span id="current-time"></span> • System running smoothly
+            <span class="system-status">
+                <span class="status-indicator"></span>
+                {{ stats.system_health.status|title }}
+            </span>
+        </p>
+        
+        <div class="admin-quick-actions">
+            <a href="{{ url_for('admin.manage_users') }}" class="btn-travel">
+                👥 Manage Users
+            </a>
+            <a href="{{ url_for('admin.manage_trips') }}" class="btn-travel">
+                ✈️ Manage Trips
+            </a>
+            <a href="{{ url_for('admin.system_info') }}" class="btn-travel">
+                ⚙️ System Info
+            </a>
+            <a href="{{ url_for('trips.create_trip') }}" class="btn-travel">
+                ➕ Create Trip
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <!-- Users Card -->
+        <div class="stat-card users">
+            <div class="stat-header">
+                <div class="stat-icon">👥</div>
+                <div class="stat-trend {% if stats.user_growth > 0 %}positive{% elif stats.user_growth < 0 %}negative{% else %}neutral{% endif %}">
+                    {% if stats.user_growth > 0 %}
+                        +{{ stats.user_growth }}% ↗
+                    {% elif stats.user_growth < 0 %}
+                        {{ stats.user_growth }}% ↘
+                    {% else %}
+                        0% →
+                    {% endif %}
                 </div>
+            </div>
+            <div class="stat-number">{{ stats.total_users }}</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-action">
+                <a href="{{ url_for('admin.manage_users') }}" class="btn-travel btn-primary-travel">
+                    Manage Users
+                </a>
+            </div>
+        </div>
+
+        <!-- Trips Card -->
+        <div class="stat-card trips">
+            <div class="stat-header">
+                <div class="stat-icon">✈️</div>
+                <div class="stat-trend {% if stats.trip_growth > 0 %}positive{% elif stats.trip_growth < 0 %}negative{% else %}neutral{% endif %}">
+                    {% if stats.trip_growth > 0 %}
+                        +{{ stats.trip_growth }}% ↗
+                    {% elif stats.trip_growth < 0 %}
+                        {{ stats.trip_growth }}% ↘
+                    {% else %}
+                        0% →
+                    {% endif %}
+                </div>
+            </div>
+            <div class="stat-number">{{ stats.total_trips }}</div>
+            <div class="stat-label">Total Trips</div>
+            <div class="stat-action">
+                <a href="{{ url_for('admin.manage_trips') }}" class="btn-travel btn-secondary-travel">
+                    Manage Trips
+                </a>
+            </div>
+        </div>
+
+        <!-- Active Members Card -->
+        <div class="stat-card members">
+            <div class="stat-header">
+                <div class="stat-icon">🌟</div>
+                <div class="stat-trend positive">
+                    Live
+                </div>
+            </div>
+            <div class="stat-number">{{ stats.active_members }}</div>
+            <div class="stat-label">Active Members</div>
+            <div class="stat-action">
+                <a href="{{ url_for('trips.dashboard') }}" class="btn-travel btn-success-travel">
+                    View Activity
+                </a>
+            </div>
+        </div>
+
+        <!-- System Health Card -->
+        <div class="stat-card health">
+            <div class="stat-header">
+                <div class="stat-icon">💚</div>
+                <div class="stat-trend positive">
+                    {{ stats.system_health.uptime }}
+                </div>
+            </div>
+            <div class="stat-number" style="font-size: 1.5rem;">{{ stats.system_health.status|upper }}</div>
+            <div class="stat-label">System Status</div>
+            <div class="stat-action">
+                <a href="{{ url_for('admin.system_info') }}" class="btn-travel btn-secondary-travel">
+                    View Details
+                </a>
             </div>
         </div>
     </div>
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <h3>Recent Users</h3>
-            <ul class="list-group">
-                {% for user in recent_users %}
-                    <li class="list-group-item">{{ user.username }}</li>
+
+    <!-- Main Content Grid -->
+    <div class="admin-content-grid">
+        <!-- Recent Activity Feed -->
+        <div class="activity-feed">
+            <h3>📊 Recent Activity</h3>
+            {% if recent_activity %}
+                {% for activity in recent_activity %}
+                <div class="activity-item">
+                    <div class="activity-icon">{{ activity.icon }}</div>
+                    <div class="activity-content">
+                        <div class="activity-description">{{ activity.description }}</div>
+                        <div class="activity-time">{{ activity.timestamp.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                    </div>
+                </div>
                 {% endfor %}
-            </ul>
+            {% else %}
+                <div class="activity-item">
+                    <div class="activity-icon">📝</div>
+                    <div class="activity-content">
+                        <div class="activity-description">No recent activity</div>
+                        <div class="activity-time">System is ready for new users and trips</div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
-        <div class="col-md-6">
-            <h3>Recent Trips</h3>
-            <ul class="list-group">
-                {% for trip in recent_trips %}
-                    <li class="list-group-item">{{ trip.title }}</li>
-                {% endfor %}
-            </ul>
+
+        <!-- Quick Actions Panel -->
+        <div class="quick-actions-panel">
+            <h3>⚡ Quick Actions</h3>
+            
+            <a href="{{ url_for('admin.manage_users') }}" class="quick-action-item">
+                <div class="quick-action-title">👥 User Management</div>
+                <div class="quick-action-description">View, edit, and manage user accounts</div>
+            </a>
+
+            <a href="{{ url_for('admin.manage_trips') }}" class="quick-action-item">
+                <div class="quick-action-title">✈️ Trip Oversight</div>
+                <div class="quick-action-description">Monitor and manage all trips</div>
+            </a>
+
+            <a href="{{ url_for('admin.system_info') }}" class="quick-action-item">
+                <div class="quick-action-title">⚙️ System Information</div>
+                <div class="quick-action-description">View system stats and health</div>
+            </a>
+
+            <a href="{{ url_for('trips.create_trip') }}" class="quick-action-item">
+                <div class="quick-action-title">➕ Create New Trip</div>
+                <div class="quick-action-description">Start planning a new adventure</div>
+            </a>
+
+            <a href="{{ url_for('auth.register') }}" class="quick-action-item">
+                <div class="quick-action-title">👤 Add User</div>
+                <div class="quick-action-description">Register a new user account</div>
+            </a>
         </div>
     </div>
+
+    <!-- Summary Stats -->
+    <div class="card-travel" style="text-align: center; margin-top: var(--space-xl);">
+        <h3 style="margin-bottom: var(--space-lg);">📈 Weekly Summary</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-lg);">
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue);">{{ stats.recent_users_count }}</div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">New Users This Week</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--secondary-orange);">{{ stats.recent_trips_count }}</div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">New Trips This Week</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--accent-green);">{{ stats.total_invitations }}</div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">Total Invitations</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--gray-700);">{{ stats.system_health.uptime }}</div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">System Uptime</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update current time
+function updateTime() {
+    const now = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+    document.getElementById('current-time').textContent = now.toLocaleDateString('en-US', options);
+}
+
+// Update time immediately and then every minute
+updateTime();
+setInterval(updateTime, 60000);
+</script>
 {% endblock %}
