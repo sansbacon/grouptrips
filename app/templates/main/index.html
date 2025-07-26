@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}GroupTrips - Plan Amazing Adventures Together{% endblock %}
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content fade-in">
+            <h1>Plan Amazing Adventures Together</h1>
+            <p>Coordinate group trips effortlessly. Vote on dates, choose accommodations, and plan activities with your travel companions.</p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                {% if not session['user_id'] %}
+                    <a href="{{ url_for('auth.register') }}" class="btn-travel btn-primary-travel">
+                        🚀 Start Planning Your Trip
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn-travel btn-secondary-travel">
+                        🔑 Sign In
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('trips.dashboard') }}" class="btn-travel btn-primary-travel">
+                        🏠 Go to Dashboard
+                    </a>
+                    <a href="{{ url_for('trips.create_trip') }}" class="btn-travel btn-secondary-travel">
+                        ➕ Create New Trip
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section style="padding: 4rem 0; background: white;">
+        <div class="container-travel">
+            <div class="text-center mb-5">
+                <h2 style="color: var(--gray-800); margin-bottom: 1rem;">Everything You Need for Group Travel</h2>
+                <p style="font-size: 1.125rem; color: var(--gray-600); max-width: 600px; margin: 0 auto;">
+                    From initial planning to final bookings, GroupTrips makes coordinating with friends simple and fun.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card card-travel">
+                    <div class="feature-icon">📅</div>
+                    <h3 class="feature-title">Coordinate Dates</h3>
+                    <p style="color: var(--gray-600);">
+                        Suggest dates and let everyone vote on their preferences. Find the perfect time that works for the whole group.
+                    </p>
+                </div>
+                
+                <div class="feature-card card-travel">
+                    <div class="feature-icon">🏠</div>
+                    <h3 class="feature-title">Choose Accommodations</h3>
+                    <p style="color: var(--gray-600);">
+                        Share housing options, compare prices, and vote on the best places to stay. Everyone gets a say in where you'll rest.
+                    </p>
+                </div>
+                
+                <div class="feature-card card-travel">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Plan Activities</h3>
+                    <p style="color: var(--gray-600);">
+                        Suggest activities and attractions. Vote on must-do experiences and create an itinerary everyone will love.
+                    </p>
+                </div>
+                
+                <div class="feature-card card-travel">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="feature-title">Stay Connected</h3>
+                    <p style="color: var(--gray-600);">
+                        Comment on suggestions, share ideas, and keep everyone in the loop throughout the planning process.
+                    </p>
+                </div>
+                
+                <div class="feature-card card-travel">
+                    <div class="feature-icon">👥</div>
+                    <h3 class="feature-title">Invite Friends</h3>
+                    <p style="color: var(--gray-600);">
+                        Easily invite travel companions to join your trip planning. Everyone can contribute to making it perfect.
+                    </p>
+                </div>
+                
+                <div class="feature-card card-travel">
+                    <div class="feature-icon">✅</div>
+                    <h3 class="feature-title">Make Decisions</h3>
+                    <p style="color: var(--gray-600);">
+                        Democratic voting system ensures everyone's voice is heard. No more endless group chats trying to decide!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section style="padding: 4rem 0; background: var(--gray-50);">
+        <div class="container-travel">
+            <div class="text-center mb-5">
+                <h2 style="color: var(--gray-800); margin-bottom: 1rem;">How It Works</h2>
+                <p style="font-size: 1.125rem; color: var(--gray-600);">
+                    Get started in just a few simple steps
+                </p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; max-width: 800px; margin: 0 auto;">
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 2rem; font-weight: bold;">1</div>
+                    <h4 style="color: var(--gray-800); margin-bottom: 0.5rem;">Create a Trip</h4>
+                    <p style="color: var(--gray-600);">Start by creating a new trip and giving it a name and description.</p>
+                </div>
+                
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: var(--secondary-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 2rem; font-weight: bold;">2</div>
+                    <h4 style="color: var(--gray-800); margin-bottom: 0.5rem;">Invite Friends</h4>
+                    <p style="color: var(--gray-600);">Send invitations to your travel companions to join the planning.</p>
+                </div>
+                
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: var(--accent-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 2rem; font-weight: bold;">3</div>
+                    <h4 style="color: var(--gray-800); margin-bottom: 0.5rem;">Plan Together</h4>
+                    <p style="color: var(--gray-600);">Suggest dates, accommodations, and activities. Vote and comment on options.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    {% if not session['user_id'] %}
+    <section style="padding: 4rem 0; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-orange)); color: white;">
+        <div class="container-travel text-center">
+            <h2 style="color: white; margin-bottom: 1rem;">Ready to Plan Your Next Adventure?</h2>
+            <p style="font-size: 1.125rem; margin-bottom: 2rem; opacity: 0.95;">
+                Join thousands of travelers who use GroupTrips to coordinate amazing group adventures.
+            </p>
+            <a href="{{ url_for('auth.register') }}" class="btn-travel" style="background: white; color: var(--primary-blue); font-weight: 600;">
+                🚀 Get Started Free
+            </a>
+        </div>
+    </section>
+    {% endif %}
+{% endblock %}

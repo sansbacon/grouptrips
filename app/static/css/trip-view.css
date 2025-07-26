@@ -1,0 +1,342 @@
+/* Trip View Specific Styles */
+
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  border-bottom: 2px solid var(--gray-200);
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.tab-button {
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  color: var(--gray-600);
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab-button:hover {
+  color: var(--primary-blue);
+  text-decoration: none;
+}
+
+.tab-button.active {
+  color: var(--primary-blue);
+  border-bottom-color: var(--primary-blue);
+}
+
+/* Trip Header */
+.trip-header {
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-orange));
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  border-radius: var(--radius-xl);
+}
+
+.trip-header h1 {
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.trip-header p {
+  opacity: 0.95;
+  margin-bottom: 1rem;
+}
+
+.trip-meta {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+}
+
+.trip-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Section Cards */
+.section-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--gray-800);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Suggestion Items */
+.suggestion-item {
+  background: var(--gray-50);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--primary-blue);
+}
+
+.suggestion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.suggestion-title {
+  font-weight: 600;
+  color: var(--gray-800);
+  margin-bottom: 0.25rem;
+}
+
+.suggestion-meta {
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.suggestion-content {
+  margin-bottom: 1rem;
+}
+
+/* Voting Buttons */
+.voting-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.vote-btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.vote-btn-preferred {
+  background: var(--accent-green);
+  color: white;
+}
+
+.vote-btn-preferred:hover {
+  background: var(--accent-green-light);
+  color: white;
+  text-decoration: none;
+}
+
+.vote-btn-available {
+  background: var(--primary-blue);
+  color: white;
+}
+
+.vote-btn-available:hover {
+  background: var(--primary-blue-light);
+  color: white;
+  text-decoration: none;
+}
+
+.vote-btn-acceptable {
+  background: var(--primary-blue);
+  color: white;
+}
+
+.vote-btn-acceptable:hover {
+  background: var(--primary-blue-light);
+  color: white;
+  text-decoration: none;
+}
+
+.vote-btn-not-available,
+.vote-btn-not-acceptable {
+  background: #ef4444;
+  color: white;
+}
+
+.vote-btn-not-available:hover,
+.vote-btn-not-acceptable:hover {
+  background: #dc2626;
+  color: white;
+  text-decoration: none;
+}
+
+/* Vote Counts */
+.vote-counts {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.vote-count {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: white;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--gray-200);
+}
+
+/* Comments Section */
+.comments-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+.comment {
+  background: white;
+  padding: 0.75rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+  border-left: 3px solid var(--primary-blue);
+}
+
+.comment-author {
+  font-weight: 500;
+  color: var(--gray-800);
+  margin-bottom: 0.25rem;
+}
+
+.comment-content {
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+/* Forms */
+.suggestion-form {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-top: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Members List */
+.members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.member-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--primary-blue);
+  color: white;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+}
+
+.member-role {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trip-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .suggestion-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .voting-buttons {
+    justify-content: center;
+  }
+  
+  .vote-counts {
+    justify-content: center;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Empty States */
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--gray-600);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-active {
+  background: var(--accent-green);
+  color: white;
+}
+
+.status-pending {
+  background: var(--secondary-orange);
+  color: white;
+}
+
+.status-inactive {
+  background: var(--gray-300);
+  color: var(--gray-700);
+}
