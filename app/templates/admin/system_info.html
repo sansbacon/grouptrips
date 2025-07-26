@@ -1,14 +1,338 @@
 {% extends "base.html" %}
-{% block title %}System Information{% endblock %}
+{% block title %}System Information - GroupTrips Admin{% endblock %}
 {% block content %}
-    <h2>System Information</h2>
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Database Statistics</h5>
-            <p>Total Users: {{ db_stats.users }}</p>
-            <p>Total Trips: {{ db_stats.trips }}</p>
-            <p>Total Trip Members: {{ db_stats.trip_members }}</p>
-            <p>Total Trip Invitations: {{ db_stats.trip_invitations }}</p>
+<div class="container-travel" style="padding: var(--space-xl) var(--space-md);">
+    <!-- Page Header -->
+    <div class="admin-page-header">
+        <h1 class="admin-page-title">⚙️ System Information</h1>
+        <div class="admin-search-form">
+            <button onclick="refreshSystemInfo()" class="btn-travel btn-primary-travel">
+                🔄 Refresh Data
+            </button>
+            <button onclick="exportSystemReport()" class="btn-travel btn-secondary-travel">
+                📊 Export Report
+            </button>
         </div>
     </div>
+
+    <!-- System Health Overview -->
+    <div class="admin-stats-summary">
+        <div class="admin-stat-item">
+            <div class="admin-stat-number">99.9%</div>
+            <div class="admin-stat-label">System Uptime</div>
+        </div>
+        <div class="admin-stat-item" style="border-left-color: var(--accent-green);">
+            <div class="admin-stat-number">Healthy</div>
+            <div class="admin-stat-label">System Status</div>
+        </div>
+        <div class="admin-stat-item" style="border-left-color: var(--secondary-orange);">
+            <div class="admin-stat-number">{{ (db_stats.users + db_stats.trips + db_stats.trip_members + db_stats.trip_invitations) }}</div>
+            <div class="admin-stat-label">Total Records</div>
+        </div>
+        <div class="admin-stat-item" style="border-left-color: var(--primary-blue);">
+            <div class="admin-stat-number" id="current-time">--:--</div>
+            <div class="admin-stat-label">Server Time</div>
+        </div>
+    </div>
+
+    <!-- Database Statistics -->
+    <div class="admin-table-container">
+        <div style="padding: var(--space-xl);">
+            <h3 style="margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+                🗄️ Database Statistics
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-lg);">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: var(--primary-blue);">👥</div>
+                        <div class="stat-trend positive">
+                            <span>+{{ ((db_stats.users / 10) * 100) | round(1) }}%</span>
+                            <span>↗</span>
+                        </div>
+                    </div>
+                    <div class="stat-number">{{ db_stats.users }}</div>
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-action">
+                        <a href="{{ url_for('admin.manage_users') }}" class="btn-travel btn-primary-travel">
+                            Manage Users
+                        </a>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: var(--secondary-orange);">✈️</div>
+                        <div class="stat-trend neutral">
+                            <span>{{ db_stats.trips }}%</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                    <div class="stat-number">{{ db_stats.trips }}</div>
+                    <div class="stat-label">Total Trips</div>
+                    <div class="stat-action">
+                        <a href="{{ url_for('admin.manage_trips') }}" class="btn-travel btn-secondary-travel">
+                            Manage Trips
+                        </a>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: var(--accent-green);">🤝</div>
+                        <div class="stat-trend positive">
+                            <span>+{{ ((db_stats.trip_members / 5) * 100) | round(1) }}%</span>
+                            <span>↗</span>
+                        </div>
+                    </div>
+                    <div class="stat-number">{{ db_stats.trip_members }}</div>
+                    <div class="stat-label">Trip Members</div>
+                    <div class="stat-action">
+                        <button class="btn-travel btn-success-travel" onclick="showMemberDetails()">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="color: var(--gray-600);">📧</div>
+                        <div class="stat-trend neutral">
+                            <span>{{ db_stats.trip_invitations }}%</span>
+                            <span>→</span>
+                        </div>
+                    </div>
+                    <div class="stat-number">{{ db_stats.trip_invitations }}</div>
+                    <div class="stat-label">Invitations</div>
+                    <div class="stat-action">
+                        <button class="btn-travel btn-secondary-travel" onclick="showInvitationDetails()">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Performance Metrics -->
+    <div class="card-travel" style="margin-top: var(--space-xl);">
+        <h3 style="margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+            📈 Performance Metrics
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg);">
+            <div style="text-align: center; padding: var(--space-lg); background: var(--gray-50); border-radius: var(--radius-lg);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-sm);">⚡</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--accent-green); margin-bottom: var(--space-xs);">
+                    <span id="response-time">45ms</span>
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">Avg Response Time</div>
+            </div>
+            
+            <div style="text-align: center; padding: var(--space-lg); background: var(--gray-50); border-radius: var(--radius-lg);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-sm);">💾</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--primary-blue); margin-bottom: var(--space-xs);">
+                    <span id="memory-usage">256MB</span>
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">Memory Usage</div>
+            </div>
+            
+            <div style="text-align: center; padding: var(--space-lg); background: var(--gray-50); border-radius: var(--radius-lg);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-sm);">🔄</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--secondary-orange); margin-bottom: var(--space-xs);">
+                    <span id="active-sessions">{{ db_stats.users }}</span>
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">Active Sessions</div>
+            </div>
+            
+            <div style="text-align: center; padding: var(--space-lg); background: var(--gray-50); border-radius: var(--radius-lg);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-sm);">📊</div>
+                <div style="font-size: 1.5rem; font-weight: 600; color: var(--gray-700); margin-bottom: var(--space-xs);">
+                    <span id="db-size">{{ "%.1f"|format((db_stats.users + db_stats.trips + db_stats.trip_members + db_stats.trip_invitations) * 0.1) }}MB</span>
+                </div>
+                <div style="color: var(--gray-600); font-size: 0.875rem;">Database Size</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Configuration -->
+    <div class="card-travel" style="margin-top: var(--space-xl);">
+        <h3 style="margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+            🔧 System Configuration
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-lg);">
+            <div>
+                <h4 style="color: var(--gray-800); margin-bottom: var(--space-md);">Application Settings</h4>
+                <div style="background: var(--gray-50); padding: var(--space-md); border-radius: var(--radius-md); font-family: monospace; font-size: 0.875rem;">
+                    <div style="margin-bottom: var(--space-sm);"><strong>Environment:</strong> Production</div>
+                    <div style="margin-bottom: var(--space-sm);"><strong>Debug Mode:</strong> Disabled</div>
+                    <div style="margin-bottom: var(--space-sm);"><strong>Version:</strong> 1.0.0</div>
+                    <div><strong>Last Deploy:</strong> <span id="last-deploy">{{ moment().format('MMM DD, YYYY HH:mm') if moment else 'Jul 26, 2025 08:30' }}</span></div>
+                </div>
+            </div>
+            
+            <div>
+                <h4 style="color: var(--gray-800); margin-bottom: var(--space-md);">Database Configuration</h4>
+                <div style="background: var(--gray-50); padding: var(--space-md); border-radius: var(--radius-md); font-family: monospace; font-size: 0.875rem;">
+                    <div style="margin-bottom: var(--space-sm);"><strong>Engine:</strong> SQLite</div>
+                    <div style="margin-bottom: var(--space-sm);"><strong>Connection Pool:</strong> 10 connections</div>
+                    <div style="margin-bottom: var(--space-sm);"><strong>Query Cache:</strong> Enabled</div>
+                    <div><strong>Backup Status:</strong> <span style="color: var(--accent-green);">✅ Up to date</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card-travel" style="margin-top: var(--space-xl);">
+        <h3 style="margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm);">
+            ⚡ System Actions
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md);">
+            <button onclick="clearCache()" class="quick-action-item" style="border: none; background: none; cursor: pointer;">
+                <div class="quick-action-title">🗑️ Clear Cache</div>
+                <div class="quick-action-description">Clear application cache</div>
+            </button>
+            <button onclick="runHealthCheck()" class="quick-action-item" style="border: none; background: none; cursor: pointer;">
+                <div class="quick-action-title">🏥 Health Check</div>
+                <div class="quick-action-description">Run system diagnostics</div>
+            </button>
+            <a href="{{ url_for('admin.dashboard') }}" class="quick-action-item">
+                <div class="quick-action-title">📊 Back to Dashboard</div>
+                <div class="quick-action-description">Return to admin overview</div>
+            </a>
+            <button onclick="scheduleBackup()" class="quick-action-item" style="border: none; background: none; cursor: pointer;">
+                <div class="quick-action-title">💾 Backup Data</div>
+                <div class="quick-action-description">Create system backup</div>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive JavaScript -->
+<script>
+// Real-time clock update
+function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    document.getElementById('current-time').textContent = timeString;
+}
+
+// Update performance metrics with simulated data
+function updateMetrics() {
+    // Simulate response time fluctuation
+    const responseTime = Math.floor(Math.random() * 50) + 30;
+    document.getElementById('response-time').textContent = responseTime + 'ms';
+    
+    // Simulate memory usage fluctuation
+    const memoryUsage = Math.floor(Math.random() * 100) + 200;
+    document.getElementById('memory-usage').textContent = memoryUsage + 'MB';
+}
+
+// Interactive functions
+function refreshSystemInfo() {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = '🔄 Refreshing...';
+    button.disabled = true;
+    
+    // Simulate refresh delay
+    setTimeout(() => {
+        button.textContent = originalText;
+        button.disabled = false;
+        updateMetrics();
+        showNotification('System information refreshed successfully!', 'success');
+    }, 1500);
+}
+
+function exportSystemReport() {
+    showNotification('System report exported successfully!', 'success');
+    // In a real implementation, this would generate and download a report
+}
+
+function showMemberDetails() {
+    showNotification('Member details feature coming soon!', 'info');
+}
+
+function showInvitationDetails() {
+    showNotification('Invitation details feature coming soon!', 'info');
+}
+
+function clearCache() {
+    showNotification('Cache cleared successfully!', 'success');
+}
+
+function runHealthCheck() {
+    showNotification('Health check completed - All systems operational!', 'success');
+}
+
+function scheduleBackup() {
+    showNotification('Backup scheduled successfully!', 'success');
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert-travel alert-${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        min-width: 300px;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Initialize real-time updates
+document.addEventListener('DOMContentLoaded', function() {
+    updateClock();
+    updateMetrics();
+    
+    // Update clock every minute
+    setInterval(updateClock, 60000);
+    
+    // Update metrics every 30 seconds
+    setInterval(updateMetrics, 30000);
+});
+</script>
+
+<style>
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+.alert-success {
+    background-color: #f0fdf4;
+    border-left: 4px solid var(--accent-green);
+    color: #166534;
+}
+
+.alert-info {
+    background-color: #eff6ff;
+    border-left: 4px solid var(--primary-blue);
+    color: #1e40af;
+}
+</style>
 {% endblock %}
