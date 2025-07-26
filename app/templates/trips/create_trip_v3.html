@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block title %}Create New Trip - GroupTrips{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create-trip-simple.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="create-trip-container">
+    <!-- Header Section -->
+    <div class="trip-header">
+        <div class="header-content">
+            <div class="header-icon">✈️</div>
+            <h1>Create Your Next Adventure</h1>
+            <p>Plan an amazing trip with friends, family, or colleagues</p>
+        </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <form method="POST" class="trip-form">
+            {{ form.hidden_tag() }}
+            
+            <!-- Single Step Form (no JavaScript navigation) -->
+            <div class="form-step active">
+                <div class="step-header">
+                    <h2>Create Your Trip</h2>
+                    <p>Fill in the details for your amazing adventure</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="{{ form.title.id }}" class="form-label">
+                            <span class="label-text">{{ form.title.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        {{ form.title(class="form-input", placeholder="e.g., Summer Beach Getaway 2025") }}
+                        <div class="form-hint">Choose a memorable name that captures the spirit of your trip</div>
+                        {% if form.title.errors %}
+                            <div class="form-error">
+                                {% for error in form.title.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.description.id }}" class="form-label">
+                            <span class="label-text">{{ form.description.label.text }}</span>
+                        </label>
+                        {{ form.description(class="form-textarea", placeholder="Tell everyone what this trip is about, what you'll do, and what makes it special...", rows="4") }}
+                        <div class="form-hint">Help others get excited about your trip! Mention activities, goals, or special occasions.</div>
+                        {% if form.description.errors %}
+                            <div class="form-error">
+                                {% for error in form.description.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.destination.id }}" class="form-label">
+                            <span class="label-text">{{ form.destination.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📍</span>
+                            {{ form.destination(class="form-input", placeholder="e.g., Cancun, Mexico or Paris, France") }}
+                        </div>
+                        <div class="form-hint">Be as specific as you'd like - city, region, or even specific venues</div>
+                        {% if form.destination.errors %}
+                            <div class="form-error">
+                                {% for error in form.destination.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.trip_type.id }}" class="form-label">
+                            <span class="label-text">{{ form.trip_type.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        {{ form.trip_type(class="form-select") }}
+                        <div class="form-hint">This helps us suggest relevant activities and planning tips</div>
+                        {% if form.trip_type.errors %}
+                            <div class="form-error">
+                                {% for error in form.trip_type.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.privacy_level.id }}" class="form-label">
+                            <span class="label-text">{{ form.privacy_level.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        {{ form.privacy_level(class="form-select") }}
+                        <div class="form-hint">You can change this later in trip settings</div>
+                        {% if form.privacy_level.errors %}
+                            <div class="form-error">
+                                {% for error in form.privacy_level.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.estimated_budget_per_person.id }}" class="form-label">
+                            <span class="label-text">{{ form.estimated_budget_per_person.label.text }}</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">💰</span>
+                            {{ form.estimated_budget_per_person(class="form-input", placeholder="1500") }}
+                        </div>
+                        <div class="form-hint">Optional - helps with planning and setting expectations</div>
+                        {% if form.estimated_budget_per_person.errors %}
+                            <div class="form-error">
+                                {% for error in form.estimated_budget_per_person.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.max_participants.id }}" class="form-label">
+                            <span class="label-text">{{ form.max_participants.label.text }}</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">👥</span>
+                            {{ form.max_participants(class="form-input", placeholder="12") }}
+                        </div>
+                        <div class="form-hint">Including yourself - you can adjust this later</div>
+                        {% if form.max_participants.errors %}
+                            <div class="form-error">
+                                {% for error in form.max_participants.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.suggested_start_date.id }}" class="form-label">
+                            <span class="label-text">{{ form.suggested_start_date.label.text }}</span>
+                        </label>
+                        {{ form.suggested_start_date(class="form-input") }}
+                        <div class="form-hint">Optional - you can add multiple date options later</div>
+                        {% if form.suggested_start_date.errors %}
+                            <div class="form-error">
+                                {% for error in form.suggested_start_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.suggested_end_date.id }}" class="form-label">
+                            <span class="label-text">{{ form.suggested_end_date.label.text }}</span>
+                        </label>
+                        {{ form.suggested_end_date(class="form-input") }}
+                        <div class="form-hint">Optional - you can add multiple date options later</div>
+                        {% if form.suggested_end_date.errors %}
+                            <div class="form-error">
+                                {% for error in form.suggested_end_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.initial_invitees.id }}" class="form-label">
+                            <span class="label-text">{{ form.initial_invitees.label.text }}</span>
+                        </label>
+                        {{ form.initial_invitees(class="form-textarea", placeholder="john@email.com, jane@email.com, friend@example.com", rows="4") }}
+                        <div class="form-hint">Enter email addresses separated by commas. All invitees will be added as trip members.</div>
+                        {% if form.initial_invitees.errors %}
+                            <div class="form-error">
+                                {% for error in form.initial_invitees.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    {{ form.submit(class="btn btn-success") }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

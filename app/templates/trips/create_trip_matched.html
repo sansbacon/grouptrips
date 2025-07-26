@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block title %}Create New Trip - GroupTrips{% endblock %}
+
+{% block content %}
+<div class="container-travel" style="padding: 2rem 1rem;">
+    <!-- Trip Header -->
+    <div class="trip-header">
+        <div class="container-travel">
+            <div style="text-align: center;">
+                <h1 style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    ✈️ Create Your Next Adventure
+                </h1>
+                <p style="font-size: 1.1rem; margin-bottom: 0; opacity: 0.95;">
+                    Plan an amazing trip with friends, family, or colleagues
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Trip Form Section -->
+    <div class="section-card">
+        <div class="section-header">
+            <h3 class="section-title">
+                📝 Trip Details
+            </h3>
+        </div>
+
+        <form method="POST" action="{{ url_for('trips.create_trip') }}">
+            {{ form.hidden_tag() }}
+            
+            <!-- Basic Information -->
+            <div class="suggestion-form">
+                <h4 style="margin-bottom: 1rem; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem;">
+                    ✨ Basic Information
+                </h4>
+                
+                <div class="form-row">
+                    <div class="form-group-travel">
+                        {{ form.title.label(class="form-label-travel") }}
+                        {{ form.title(class="form-control-travel", placeholder="e.g., Summer Beach Getaway 2025") }}
+                        {% if form.title.errors %}
+                            <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                                {% for error in form.title.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="color: var(--gray-500); font-size: 0.875rem;">Choose a memorable name that captures the spirit of your trip</small>
+                    </div>
+                </div>
+
+                <div class="form-group-travel">
+                    {{ form.description.label(class="form-label-travel") }}
+                    {{ form.description(class="form-control-travel", rows=4, placeholder="Tell everyone what this trip is about, what you'll do, and what makes it special...") }}
+                    {% if form.description.errors %}
+                        <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                            {% for error in form.description.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <small style="color: var(--gray-500); font-size: 0.875rem;">Help others get excited about your trip! Mention activities, goals, or special occasions.</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-travel">
+                        {{ form.destination.label(class="form-label-travel") }}
+                        {{ form.destination(class="form-control-travel", placeholder="e.g., Cancun, Mexico or Paris, France") }}
+                        {% if form.destination.errors %}
+                            <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                                {% for error in form.destination.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="color: var(--gray-500); font-size: 0.875rem;">📍 Be as specific as you'd like - city, region, or even specific venues</small>
+                    </div>
+                    <div class="form-group-travel">
+                        {{ form.trip_type.label(class="form-label-travel") }}
+                        {{ form.trip_type(class="form-control-travel") }}
+                        {% if form.trip_type.errors %}
+                            <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                                {% for error in form.trip_type.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="color: var(--gray-500); font-size: 0.875rem;">This helps us suggest relevant activities and planning tips</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group-travel">
+                        {{ form.privacy_level.label(class="form-label-travel") }}
+                        {{ form.privacy_level(class="form-control-travel") }}
+                        {% if form.privacy_level.errors %}
+                            <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                                {% for error in form.privacy_level.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="color: var(--gray-500); font-size: 0.875rem;">You can change this later in trip settings</small>
+                    </div>
+                    <div class="form-group-travel">
+                        {{ form.max_participants.label(class="form-label-travel") }}
+                        {{ form.max_participants(class="form-control-travel", placeholder="12") }}
+                        {% if form.max_participants.errors %}
+                            <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                                {% for error in form.max_participants.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="color: var(--gray-500); font-size: 0.875rem;">👥 Including yourself - you can adjust this later</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Information -->
+            <div class="suggestion-form" style="margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem;">
+                    💰 Budget Planning
+                </h4>
+                
+                <div class="form-group-travel">
+                    {{ form.estimated_budget_per_person.label(class="form-label-travel") }}
+                    {{ form.estimated_budget_per_person(class="form-control-travel", placeholder="1500") }}
+                    {% if form.estimated_budget_per_person.errors %}
+                        <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                            {% for error in form.estimated_budget_per_person.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <small style="color: var(--gray-500); font-size: 0.875rem;">Optional - helps with planning and setting expectations</small>
+                </div>
+            </div>
+
+            <!-- Date Suggestions -->
+            <div class="suggestion-form" style="margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem;">
+                    📅 Initial Date Suggestions
+                </h4>
+                
+                <div class="form-row">
+                    <div class="form-group-travel">
+                        {{ form.suggested_start_date.label(class="form-label-travel") }}
+                        {{ form.suggested_start_date(class="form-control-travel") }}
+                        {% if form.suggested_start_date.errors %}
+                            <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                                {% for error in form.suggested_start_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="color: var(--gray-500); font-size: 0.875rem;">Optional - you can add multiple date options later</small>
+                    </div>
+                    <div class="form-group-travel">
+                        {{ form.suggested_end_date.label(class="form-label-travel") }}
+                        {{ form.suggested_end_date(class="form-control-travel") }}
+                        {% if form.suggested_end_date.errors %}
+                            <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                                {% for error in form.suggested_end_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small style="color: var(--gray-500); font-size: 0.875rem;">Optional - you can add multiple date options later</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Initial Invitees -->
+            <div class="suggestion-form" style="margin-top: 1.5rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem;">
+                    👥 Initial Invitees
+                </h4>
+                
+                <div class="form-group-travel">
+                    {{ form.initial_invitees.label(class="form-label-travel") }}
+                    {{ form.initial_invitees(class="form-control-travel", rows=4, placeholder="john@email.com, jane@email.com, friend@example.com") }}
+                    {% if form.initial_invitees.errors %}
+                        <div class="alert-travel alert-danger" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.875rem;">
+                            {% for error in form.initial_invitees.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <small style="color: var(--gray-500); font-size: 0.875rem;">Enter email addresses separated by commas. All invitees will be added as trip members.</small>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="margin-top: 2rem; text-align: center;">
+                {{ form.submit(class="btn-travel btn-primary-travel", style="font-size: 1.125rem; padding: 1rem 2rem;") }}
+            </div>
+        </form>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="section-card" style="margin-top: 1.5rem;">
+        <div class="section-header">
+            <h3 class="section-title">
+                👀 Trip Preview
+            </h3>
+        </div>
+        
+        <div class="empty-state">
+            <div class="empty-state-icon">✈️</div>
+            <p>Fill out the form above to see a preview of your trip!</p>
+            <div id="trip-preview" style="margin-top: 1rem;">
+                <!-- Preview content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add form preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const previewSection = document.getElementById('trip-preview');
+    
+    // Form elements
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const destinationInput = document.getElementById('destination');
+    const tripTypeSelect = document.getElementById('trip_type');
+    const privacySelect = document.getElementById('privacy_level');
+    
+    function updatePreview() {
+        const title = titleInput.value || 'Your Amazing Trip';
+        const description = descriptionInput.value || 'An exciting adventure awaits!';
+        const destination = destinationInput.value || 'Destination TBD';
+        const tripType = tripTypeSelect.options[tripTypeSelect.selectedIndex].text || 'Vacation';
+        const privacy = privacySelect.options[privacySelect.selectedIndex].text || 'Private';
+        
+        if (titleInput.value || descriptionInput.value || destinationInput.value) {
+            previewSection.innerHTML = `
+                <div class="suggestion-item" style="margin-bottom: 0;">
+                    <div class="suggestion-header">
+                        <div>
+                            <div class="suggestion-title">
+                                ✈️ ${title}
+                            </div>
+                            <div class="suggestion-meta">
+                                📍 ${destination}
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <span class="status-badge status-active">${tripType}</span>
+                            <span class="status-badge status-pending">${privacy}</span>
+                        </div>
+                    </div>
+                    <div class="suggestion-content">
+                        <p style="margin: 0; color: var(--gray-700);">${description}</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            previewSection.innerHTML = '';
+        }
+    }
+    
+    // Add event listeners for real-time preview
+    [titleInput, descriptionInput, destinationInput, tripTypeSelect, privacySelect].forEach(element => {
+        if (element) {
+            element.addEventListener('input', updatePreview);
+            element.addEventListener('change', updatePreview);
+        }
+    });
+    
+    // Add loading state to form submission
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('input[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.add('loading-button');
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Add fade-in animation to cards
+    const cards = document.querySelectorAll('.section-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

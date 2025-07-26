@@ -20,6 +20,10 @@ def create_app():
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_secure_secret_key')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///grouptrips.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # File Upload Configuration
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.instance_path, 'uploads')
 
     # Email Configuration
     app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
@@ -57,6 +61,12 @@ def create_app():
         app.register_blueprint(auth_routes.auth, url_prefix='/auth')
         app.register_blueprint(admin_routes.admin, url_prefix='/admin')
         app.register_blueprint(trip_routes.trips, url_prefix='/trips')
+
+        # Add route to serve uploaded files
+        @app.route('/static/uploads/<path:filename>')
+        def uploaded_file(filename):
+            from flask import send_from_directory
+            return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
         # Create database tables for our models
         db.create_all()

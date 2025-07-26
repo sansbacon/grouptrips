@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Create New Trip - GroupTrips{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <h1 style="text-align: center; color: #333; margin-bottom: 2rem;">Create New Trip</h1>
+    
+    <form method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+        {{ form.hidden_tag() }}
+        
+        <!-- Basic Information -->
+        <div>
+            <label for="{{ form.title.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                {{ form.title.label.text }} *
+            </label>
+            {{ form.title(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+            {% if form.title.errors %}
+                <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                    {% for error in form.title.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.description.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                {{ form.description.label.text }}
+            </label>
+            {{ form.description(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-height: 100px; resize: vertical;") }}
+            {% if form.description.errors %}
+                <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                    {% for error in form.description.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.destination.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                {{ form.destination.label.text }} *
+            </label>
+            {{ form.destination(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+            {% if form.destination.errors %}
+                <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                    {% for error in form.destination.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <label for="{{ form.trip_type.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                    {{ form.trip_type.label.text }} *
+                </label>
+                {{ form.trip_type(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+                {% if form.trip_type.errors %}
+                    <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {% for error in form.trip_type.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.privacy_level.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                    {{ form.privacy_level.label.text }} *
+                </label>
+                {{ form.privacy_level(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+                {% if form.privacy_level.errors %}
+                    <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {% for error in form.privacy_level.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <label for="{{ form.estimated_budget_per_person.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                    {{ form.estimated_budget_per_person.label.text }}
+                </label>
+                {{ form.estimated_budget_per_person(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+                {% if form.estimated_budget_per_person.errors %}
+                    <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {% for error in form.estimated_budget_per_person.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.max_participants.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                    {{ form.max_participants.label.text }}
+                </label>
+                {{ form.max_participants(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+                {% if form.max_participants.errors %}
+                    <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {% for error in form.max_participants.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                <label for="{{ form.suggested_start_date.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                    {{ form.suggested_start_date.label.text }}
+                </label>
+                {{ form.suggested_start_date(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+                {% if form.suggested_start_date.errors %}
+                    <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {% for error in form.suggested_start_date.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.suggested_end_date.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                    {{ form.suggested_end_date.label.text }}
+                </label>
+                {{ form.suggested_end_date(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;") }}
+                {% if form.suggested_end_date.errors %}
+                    <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                        {% for error in form.suggested_end_date.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div>
+            <label for="{{ form.initial_invitees.id }}" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">
+                {{ form.initial_invitees.label.text }}
+            </label>
+            {{ form.initial_invitees(style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; min-height: 80px; resize: vertical;") }}
+            <div style="font-size: 0.875rem; color: #666; margin-top: 0.25rem;">
+                Enter email addresses separated by commas
+            </div>
+            {% if form.initial_invitees.errors %}
+                <div style="color: red; font-size: 0.875rem; margin-top: 0.25rem;">
+                    {% for error in form.initial_invitees.errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-top: 2rem;">
+            {{ form.submit(style="width: 100%; padding: 1rem; background: #3b82f6; color: white; border: none; border-radius: 4px; font-size: 1.125rem; font-weight: bold; cursor: pointer;") }}
+        </div>
+    </form>
+</div>
+
+<style>
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+button:hover {
+    background: #2563eb !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+@media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        display: block !important;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"] > div {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}

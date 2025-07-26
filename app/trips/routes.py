@@ -1,7 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, DateField, FloatField, HiddenField, SelectField
-from wtforms.validators import DataRequired, Optional
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, TextAreaField, SubmitField, DateField, FloatField, HiddenField, SelectField, IntegerField
+from wtforms.validators import DataRequired, Optional, NumberRange, ValidationError
+import os
+import uuid
+from werkzeug.utils import secure_filename
 from app import db
 from app.models.models import Trip, TripMember, User, SuggestedDate, DateVote, HousingOption, HousingVote, ActivityOption, ActivityVote, Comment, TripInvitation
 from functools import wraps
@@ -9,6 +13,21 @@ from datetime import datetime
 from app.utils.invitations import send_bulk_invitations
 
 trips = Blueprint('trips', __name__)
+
+def save_uploaded_file(file, upload_type):
+    """
+    Save uploaded file and return the URL path
+    upload_type: 'housing' or 'activities'
+    """
+    from ..utils.file_upload import save_uploaded_file as save_file
+    
+    if file and file.filename:
+        # Use the utility function to save the file
+        relative_path = save_file(file, upload_type)
+        if relative_path:
+            # Convert to URL path for database storage
+            return f"/static/{relative_path}"
+    return None
 
 def login_required(f):
     @wraps(f)
@@ -45,10 +64,76 @@ def role_required(role_name):
         return decorated_function
     return decorator
 
-class TripForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    description = TextAreaField('Description')
-    submit = SubmitField('Create Trip')
+class EnhancedTripForm(FlaskForm):
+    # Step 1: Basic Information
+    title = StringField('Trip Title', validators=[DataRequired()], 
+                       render_kw={"placeholder": "e.g., Summer Beach Getaway 2025", "required": True})
+    description = TextAreaField('Trip Description', 
+                               render_kw={"placeholder": "Tell everyone what this trip is about, what you'll do, and what makes it special...", "rows": 4})
+    trip_type = SelectField('Trip Type', 
+                           choices=[
+                               ('vacation', '🏖️ Vacation'),
+                               ('adventure', '🏔️ Adventure'),
+                               ('business', '💼 Business'),
+                               ('family', '👨‍👩‍👧‍👦 Family'),
+                               ('friends', '👥 Friends'),
+                               ('romantic', '💕 Romantic'),
+                               ('solo', '🚶 Solo'),
+                               ('other', '🎯 Other')
+                           ], 
+                           validators=[DataRequired()],
+                           default='vacation',
+                           render_kw={"required": True})
+    privacy_level = SelectField('Privacy Level',
+                               choices=[
+                                   ('private', '🔒 Private - Invite only'),
+                                   ('invite-only', '📧 Invite only with link sharing'),
+                                   ('public', '🌍 Public - Anyone can find')
+                               ],
+                               validators=[DataRequired()],
+                               default='private',
+                               render_kw={"required": True})
+    
+    # Step 2: Destination & Details
+    destination = StringField('Destination', validators=[DataRequired()],
+                             render_kw={"placeholder": "e.g., Cancun, Mexico or Paris, France", "required": True})
+    estimated_budget_per_person = FloatField('Estimated Budget per Person ($)', 
+                                           validators=[Optional(), NumberRange(min=0, max=100000)],
+                                           render_kw={"placeholder": "1500", "min": "0", "max": "100000"})
+    max_participants = IntegerField('Maximum Participants', 
+                                   validators=[Optional(), NumberRange(min=2, max=50)],
+                                   default=12,
+                                   render_kw={"placeholder": "12", "min": "2", "max": "50"})
+    
+    # Step 3: Initial Dates (optional)
+    suggested_start_date = DateField('Suggested Start Date', validators=[Optional()], format='%Y-%m-%d')
+    suggested_end_date = DateField('Suggested End Date', validators=[Optional()], format='%Y-%m-%d')
+    
+    # Step 4: Initial Invitees (optional)
+    initial_invitees = TextAreaField('Initial Invitees (optional)', 
+                                   render_kw={"placeholder": "john@email.com, jane@email.com, friend@example.com", "rows": 4})
+    
+    # Form navigation
+    current_step = HiddenField('Current Step', default='1')
+    submit = SubmitField('🚀 Create Trip')
+    
+    def validate_suggested_end_date(self, field):
+        if field.data and self.suggested_start_date.data:
+            if field.data < self.suggested_start_date.data:
+                raise ValidationError('End date must be after start date.')
+    
+    def validate_initial_invitees(self, field):
+        if field.data:
+            import re
+            emails = [email.strip() for email in field.data.split(',') if email.strip()]
+            email_pattern = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+            
+            for email in emails:
+                if not email_pattern.match(email):
+                    raise ValidationError(f'Invalid email address: {email}')
+            
+            if len(emails) > 20:
+                raise ValidationError('You can invite a maximum of 20 people at once.')
 
 class SuggestedDateForm(FlaskForm):
     start_date = DateField('Start Date', validators=[DataRequired()], format='%Y-%m-%d')
@@ -61,11 +146,17 @@ class HousingOptionForm(FlaskForm):
     estimated_price = FloatField('Estimated Price', validators=[Optional()])
     listing_link = StringField('Listing Link')
     description = TextAreaField('Description')
+    image = FileField('Photo', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
+    ])
     submit = SubmitField('Suggest Housing')
 
 class ActivityOptionForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     description = TextAreaField('Description')
+    image = FileField('Photo', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Images only!')
+    ])
     submit = SubmitField('Suggest Activity')
 
 class CommentForm(FlaskForm):
@@ -91,12 +182,19 @@ def dashboard():
 @trips.route('/create', methods=['GET', 'POST'])
 @login_required
 def create_trip():
-    form = TripForm()
+    form = EnhancedTripForm()
     if form.validate_on_submit():
         user_id = session['user_id']
+        
+        # Create the trip with all the enhanced fields
         trip = Trip(
             title=form.title.data,
             description=form.description.data,
+            destination=form.destination.data,
+            trip_type=form.trip_type.data,
+            privacy_level=form.privacy_level.data,
+            estimated_budget_per_person=form.estimated_budget_per_person.data,
+            max_participants=form.max_participants.data or 12,
             organizer_id=user_id
         )
         db.session.add(trip)
@@ -109,10 +207,99 @@ def create_trip():
             role='organizer'
         )
         db.session.add(trip_member)
+        
+        # Add initial suggested dates if provided
+        if form.suggested_start_date.data and form.suggested_end_date.data:
+            suggested_date = SuggestedDate(
+                trip_id=trip.id,
+                start_date=datetime.combine(form.suggested_start_date.data, datetime.min.time()),
+                end_date=datetime.combine(form.suggested_end_date.data, datetime.min.time()),
+                created_by=user_id
+            )
+            db.session.add(suggested_date)
+        
         db.session.commit()
 
-        flash('Trip created successfully!', 'success')
+        # Handle initial invitees if provided
+        if form.initial_invitees.data:
+            try:
+                from app.utils.invitations import send_bulk_invitations
+                user = User.query.get(user_id)
+                emails = [email.strip() for email in form.initial_invitees.data.split(',') if email.strip()]
+                if emails:
+                    results = send_bulk_invitations(trip, user, emails, 'member')
+                    flash(f"Trip created successfully! Invitations sent: {results['email_sent']} successful, {results['email_failed']} failed.", 'success')
+                else:
+                    flash('Trip created successfully!', 'success')
+            except Exception as e:
+                flash('Trip created successfully, but there was an issue sending invitations.', 'info')
+        else:
+            flash('Trip created successfully!', 'success')
+            
         return redirect(url_for('trips.view_trip', trip_id=trip.id))
+    
+    return render_template('trips/create_trip_matched.html', form=form)
+
+@trips.route('/create-test', methods=['GET', 'POST'])
+@login_required
+def create_trip_test():
+    """Temporary route for testing the original complex create trip page"""
+    form = EnhancedTripForm()
+    if form.validate_on_submit():
+        user_id = session['user_id']
+        
+        # Create the trip with all the enhanced fields
+        trip = Trip(
+            title=form.title.data,
+            description=form.description.data,
+            destination=form.destination.data,
+            trip_type=form.trip_type.data,
+            privacy_level=form.privacy_level.data,
+            estimated_budget_per_person=form.estimated_budget_per_person.data,
+            max_participants=form.max_participants.data or 12,
+            organizer_id=user_id
+        )
+        db.session.add(trip)
+        db.session.commit()
+
+        # Add the organizer as a member
+        trip_member = TripMember(
+            trip_id=trip.id,
+            user_id=user_id,
+            role='organizer'
+        )
+        db.session.add(trip_member)
+        
+        # Add initial suggested dates if provided
+        if form.suggested_start_date.data and form.suggested_end_date.data:
+            suggested_date = SuggestedDate(
+                trip_id=trip.id,
+                start_date=datetime.combine(form.suggested_start_date.data, datetime.min.time()),
+                end_date=datetime.combine(form.suggested_end_date.data, datetime.min.time()),
+                created_by=user_id
+            )
+            db.session.add(suggested_date)
+        
+        db.session.commit()
+
+        # Handle initial invitees if provided
+        if form.initial_invitees.data:
+            try:
+                from app.utils.invitations import send_bulk_invitations
+                user = User.query.get(user_id)
+                emails = [email.strip() for email in form.initial_invitees.data.split(',') if email.strip()]
+                if emails:
+                    results = send_bulk_invitations(trip, user, emails, 'member')
+                    flash(f"Trip created successfully! Invitations sent: {results['email_sent']} successful, {results['email_failed']} failed.", 'success')
+                else:
+                    flash('Trip created successfully!', 'success')
+            except Exception as e:
+                flash('Trip created successfully, but there was an issue sending invitations.', 'info')
+        else:
+            flash('Trip created successfully!', 'success')
+            
+        return redirect(url_for('trips.view_trip', trip_id=trip.id))
+    
     return render_template('trips/create_trip.html', form=form)
 
 @trips.route('/<int:trip_id>', methods=['GET', 'POST'])
@@ -140,6 +327,12 @@ def view_trip(trip_id):
 
     if housing_form.validate_on_submit() and housing_form.submit.data:
         user_id = session['user_id']
+        
+        # Handle image upload
+        image_url = None
+        if housing_form.image.data:
+            image_url = save_uploaded_file(housing_form.image.data, 'housing')
+        
         housing_option = HousingOption(
             trip_id=trip.id,
             name=housing_form.name.data,
@@ -147,6 +340,7 @@ def view_trip(trip_id):
             estimated_price=housing_form.estimated_price.data,
             listing_link=housing_form.listing_link.data,
             description=housing_form.description.data,
+            image_url=image_url,
             suggested_by_user_id=user_id
         )
         db.session.add(housing_option)
@@ -156,10 +350,17 @@ def view_trip(trip_id):
 
     if activity_form.validate_on_submit() and activity_form.submit.data:
         user_id = session['user_id']
+        
+        # Handle image upload
+        image_url = None
+        if activity_form.image.data:
+            image_url = save_uploaded_file(activity_form.image.data, 'activities')
+        
         activity_option = ActivityOption(
             trip_id=trip.id,
             name=activity_form.name.data,
             description=activity_form.description.data,
+            image_url=image_url,
             suggested_by_user_id=user_id
         )
         db.session.add(activity_option)

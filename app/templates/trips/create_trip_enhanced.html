@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Create New Trip - GroupTrips{% endblock %}
+
+{% block content %}
+<div style="min-height: 100vh; background: linear-gradient(135deg, #dbeafe 0%, #f9fafb 100%); padding: 2rem 1rem;">
+    <!-- Header Section -->
+    <div style="text-align: center; margin-bottom: 2rem; padding: 2rem 1rem; background: white; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); max-width: 800px; margin-left: auto; margin-right: auto;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">✈️</div>
+        <h1 style="font-size: 2.5rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem; background: linear-gradient(135deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Create Your Next Adventure</h1>
+        <p style="font-size: 1.25rem; color: #6b7280; margin: 0;">Plan an amazing trip with friends, family, or colleagues</p>
+    </div>
+
+    <!-- Form Container -->
+    <div style="max-width: 700px; margin: 0 auto;">
+        <form method="POST" style="background: white; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden;">
+            {{ form.hidden_tag() }}
+            
+            <div style="padding: 2rem;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h2 style="font-size: 2rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">Create Your Trip</h2>
+                    <p style="font-size: 1.125rem; color: #6b7280; margin: 0;">Fill in the details for your amazing adventure</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <!-- Trip Title -->
+                    <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.title.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.title.label.text }}</span>
+                            <span style="color: #ef4444; font-weight: 700;">*</span>
+                        </label>
+                        {{ form.title(style="padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;", placeholder="e.g., Summer Beach Getaway 2025") }}
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Choose a memorable name that captures the spirit of your trip</div>
+                        {% if form.title.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.title.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.description.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.description.label.text }}</span>
+                        </label>
+                        {{ form.description(style="padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box; resize: vertical; min-height: 120px;", placeholder="Tell everyone what this trip is about, what you'll do, and what makes it special...", rows="4") }}
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Help others get excited about your trip! Mention activities, goals, or special occasions.</div>
+                        {% if form.description.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.description.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Destination -->
+                    <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.destination.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.destination.label.text }}</span>
+                            <span style="color: #ef4444; font-weight: 700;">*</span>
+                        </label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <span style="position: absolute; left: 1rem; font-size: 1.25rem; z-index: 1;">📍</span>
+                            {{ form.destination(style="padding: 1rem 1rem 1rem 3rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;", placeholder="e.g., Cancun, Mexico or Paris, France") }}
+                        </div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Be as specific as you'd like - city, region, or even specific venues</div>
+                        {% if form.destination.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.destination.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Trip Type -->
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.trip_type.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.trip_type.label.text }}</span>
+                            <span style="color: #ef4444; font-weight: 700;">*</span>
+                        </label>
+                        {{ form.trip_type(style="padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;") }}
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">This helps us suggest relevant activities and planning tips</div>
+                        {% if form.trip_type.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.trip_type.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Privacy Level -->
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.privacy_level.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.privacy_level.label.text }}</span>
+                            <span style="color: #ef4444; font-weight: 700;">*</span>
+                        </label>
+                        {{ form.privacy_level(style="padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;") }}
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">You can change this later in trip settings</div>
+                        {% if form.privacy_level.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.privacy_level.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Budget -->
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.estimated_budget_per_person.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.estimated_budget_per_person.label.text }}</span>
+                        </label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <span style="position: absolute; left: 1rem; font-size: 1.25rem; z-index: 1;">💰</span>
+                            {{ form.estimated_budget_per_person(style="padding: 1rem 1rem 1rem 3rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;", placeholder="1500") }}
+                        </div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Optional - helps with planning and setting expectations</div>
+                        {% if form.estimated_budget_per_person.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.estimated_budget_per_person.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Max Participants -->
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.max_participants.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.max_participants.label.text }}</span>
+                        </label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <span style="position: absolute; left: 1rem; font-size: 1.25rem; z-index: 1;">👥</span>
+                            {{ form.max_participants(style="padding: 1rem 1rem 1rem 3rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;", placeholder="12") }}
+                        </div>
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Including yourself - you can adjust this later</div>
+                        {% if form.max_participants.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.max_participants.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Start Date -->
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.suggested_start_date.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.suggested_start_date.label.text }}</span>
+                        </label>
+                        {{ form.suggested_start_date(style="padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;") }}
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Optional - you can add multiple date options later</div>
+                        {% if form.suggested_start_date.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.suggested_start_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- End Date -->
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.suggested_end_date.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.suggested_end_date.label.text }}</span>
+                        </label>
+                        {{ form.suggested_end_date(style="padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box;") }}
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Optional - you can add multiple date options later</div>
+                        {% if form.suggested_end_date.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.suggested_end_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Initial Invitees -->
+                    <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <label for="{{ form.initial_invitees.id }}" style="display: flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <span>{{ form.initial_invitees.label.text }}</span>
+                        </label>
+                        {{ form.initial_invitees(style="padding: 1rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: white; width: 100%; box-sizing: border-box; resize: vertical; min-height: 80px;", placeholder="john@email.com, jane@email.com, friend@example.com", rows="4") }}
+                        <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">Enter email addresses separated by commas. All invitees will be added as trip members.</div>
+                        {% if form.initial_invitees.errors %}
+                            <div style="font-size: 0.875rem; color: #ef4444; font-weight: 500; margin-top: 0.25rem;">
+                                {% for error in form.initial_invitees.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    {{ form.submit(style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; border: none; border-radius: 0.75rem; font-size: 1.125rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);") }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+input:focus, select:focus, textarea:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    transform: translateY(-1px);
+}
+
+button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+@media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 1fr"] {
+        display: block !important;
+    }
+    
+    div[style*="grid-template-columns: 1fr 1fr"] > div {
+        margin-bottom: 1rem;
+    }
+    
+    div[style*="padding: 2rem"] {
+        padding: 1.5rem 1rem !important;
+    }
+    
+    h1[style*="font-size: 2.5rem"] {
+        font-size: 2rem !important;
+    }
+    
+    h2[style*="font-size: 2rem"] {
+        font-size: 1.75rem !important;
+    }
+}
+</style>
+{% endblock %}

@@ -23,7 +23,7 @@
             <div class="card-travel" style="text-align: center; padding: 1.5rem;">
                 <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
                 <div style="font-size: 1.5rem; font-weight: 600; color: var(--secondary-orange);">
-                    {% set total_members = trips|sum(attribute='members')|length if trips else 0 %}
+                    {% set total_members = trips|map(attribute='members')|map('length')|sum if trips else 0 %}
                     {{ total_members }}
                 </div>
                 <div style="color: var(--gray-600); font-size: 0.875rem;">Travel Companions</div>

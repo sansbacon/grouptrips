@@ -1,17 +1,532 @@
 {% extends "base.html" %}
-{% block title %}Create Trip{% endblock %}
+{% block title %}Create New Trip - GroupTrips{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create-trip.css') }}">
+{% endblock %}
+
 {% block content %}
-    <h2>Create a New Trip</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.title.label }}
-            {{ form.title(class="form-control") }}
+<div class="create-trip-container">
+    <!-- Header Section -->
+    <div class="trip-header">
+        <div class="header-content">
+            <div class="header-icon">✈️</div>
+            <h1>Create Your Next Adventure</h1>
+            <p>Plan an amazing trip with friends, family, or colleagues</p>
         </div>
-        <div class="form-group">
-            {{ form.description.label }}
-            {{ form.description(class="form-control") }}
+        <div class="header-decoration">
+            <div class="decoration-circle circle-1"></div>
+            <div class="decoration-circle circle-2"></div>
+            <div class="decoration-circle circle-3"></div>
         </div>
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-steps">
+            <div class="progress-step active" data-step="1">
+                <div class="step-circle">
+                    <span class="step-number">1</span>
+                    <div class="step-icon">📝</div>
+                </div>
+                <div class="step-info">
+                    <span class="step-title">Basic Info</span>
+                    <span class="step-subtitle">Trip details</span>
+                </div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="step-circle">
+                    <span class="step-number">2</span>
+                    <div class="step-icon">🌍</div>
+                </div>
+                <div class="step-info">
+                    <span class="step-title">Destination</span>
+                    <span class="step-subtitle">Where & budget</span>
+                </div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="step-circle">
+                    <span class="step-number">3</span>
+                    <div class="step-icon">📅</div>
+                </div>
+                <div class="step-info">
+                    <span class="step-title">Dates</span>
+                    <span class="step-subtitle">When to go</span>
+                </div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="step-circle">
+                    <span class="step-number">4</span>
+                    <div class="step-icon">👥</div>
+                </div>
+                <div class="step-info">
+                    <span class="step-title">Invites</span>
+                    <span class="step-subtitle">Who's coming</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <form method="POST" id="createTripForm" class="trip-form">
+            {{ form.hidden_tag() }}
+            
+            <!-- Step 1: Basic Information -->
+            <div class="form-step active" id="step-1">
+                <div class="step-header">
+                    <h2>Let's start with the basics</h2>
+                    <p>Give your trip a name and tell us what it's about</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="{{ form.title.id }}" class="form-label">
+                            <span class="label-text">{{ form.title.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        {{ form.title(class="form-input", placeholder="e.g., Summer Beach Getaway 2025") }}
+                        <div class="form-hint">Choose a memorable name that captures the spirit of your trip</div>
+                        {% if form.title.errors %}
+                            <div class="form-error">
+                                {% for error in form.title.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.description.id }}" class="form-label">
+                            <span class="label-text">{{ form.description.label.text }}</span>
+                        </label>
+                        {{ form.description(class="form-textarea", placeholder="Tell everyone what this trip is about, what you'll do, and what makes it special...", rows="4") }}
+                        <div class="form-hint">Help others get excited about your trip! Mention activities, goals, or special occasions.</div>
+                        {% if form.description.errors %}
+                            <div class="form-error">
+                                {% for error in form.description.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.trip_type.id }}" class="form-label">
+                            <span class="label-text">{{ form.trip_type.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        {{ form.trip_type(class="form-select") }}
+                        <div class="form-hint">This helps us suggest relevant activities and planning tips</div>
+                        {% if form.trip_type.errors %}
+                            <div class="form-error">
+                                {% for error in form.trip_type.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.privacy_level.id }}" class="form-label">
+                            <span class="label-text">{{ form.privacy_level.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        {{ form.privacy_level(class="form-select") }}
+                        <div class="form-hint">You can change this later in trip settings</div>
+                        {% if form.privacy_level.errors %}
+                            <div class="form-error">
+                                {% for error in form.privacy_level.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                        Next: Destination
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Destination & Budget -->
+            <div class="form-step" id="step-2">
+                <div class="step-header">
+                    <h2>Where are you headed?</h2>
+                    <p>Tell us about your destination and budget expectations</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="{{ form.destination.id }}" class="form-label">
+                            <span class="label-text">{{ form.destination.label.text }}</span>
+                            <span class="label-required">*</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">📍</span>
+                            {{ form.destination(class="form-input", placeholder="e.g., Cancun, Mexico or Paris, France") }}
+                        </div>
+                        <div class="form-hint">Be as specific as you'd like - city, region, or even specific venues</div>
+                        {% if form.destination.errors %}
+                            <div class="form-error">
+                                {% for error in form.destination.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.estimated_budget_per_person.id }}" class="form-label">
+                            <span class="label-text">{{ form.estimated_budget_per_person.label.text }}</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">💰</span>
+                            {{ form.estimated_budget_per_person(class="form-input", placeholder="1500") }}
+                        </div>
+                        <div class="form-hint">Optional - helps with planning and setting expectations</div>
+                        <div class="budget-suggestions">
+                            <span class="budget-tag" onclick="setBudget(500)">Budget ($500)</span>
+                            <span class="budget-tag" onclick="setBudget(1500)">Mid-range ($1500)</span>
+                            <span class="budget-tag" onclick="setBudget(3000)">Luxury ($3000+)</span>
+                        </div>
+                        {% if form.estimated_budget_per_person.errors %}
+                            <div class="form-error">
+                                {% for error in form.estimated_budget_per_person.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.max_participants.id }}" class="form-label">
+                            <span class="label-text">{{ form.max_participants.label.text }}</span>
+                        </label>
+                        <div class="input-with-icon">
+                            <span class="input-icon">👥</span>
+                            {{ form.max_participants(class="form-input", placeholder="12") }}
+                        </div>
+                        <div class="form-hint">Including yourself - you can adjust this later</div>
+                        {% if form.max_participants.errors %}
+                            <div class="form-error">
+                                {% for error in form.max_participants.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">💡</div>
+                    <div class="info-content">
+                        <h4>Budget Planning Tips</h4>
+                        <p>Consider including flights, accommodation, food, activities, and local transportation. You can create detailed budget breakdowns later in the trip planning process.</p>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(1)">
+                        <span class="btn-icon">←</span>
+                        Back
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                        Next: Dates
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Dates -->
+            <div class="form-step" id="step-3">
+                <div class="step-header">
+                    <h2>When would you like to go?</h2>
+                    <p>Suggest initial dates - you can add more options and let everyone vote later</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.suggested_start_date.id }}" class="form-label">
+                            <span class="label-text">{{ form.suggested_start_date.label.text }}</span>
+                        </label>
+                        {{ form.suggested_start_date(class="form-input") }}
+                        <div class="form-hint">Optional - you can add multiple date options later</div>
+                        {% if form.suggested_start_date.errors %}
+                            <div class="form-error">
+                                {% for error in form.suggested_start_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.suggested_end_date.id }}" class="form-label">
+                            <span class="label-text">{{ form.suggested_end_date.label.text }}</span>
+                        </label>
+                        {{ form.suggested_end_date(class="form-input") }}
+                        <div class="form-hint">Optional - you can add multiple date options later</div>
+                        {% if form.suggested_end_date.errors %}
+                            <div class="form-error">
+                                {% for error in form.suggested_end_date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="duration-display" id="durationDisplay" style="display: none;">
+                    <div class="duration-icon">📅</div>
+                    <div class="duration-text">
+                        <span class="duration-days"></span>
+                        <span class="duration-label">Trip Duration</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">🗓️</div>
+                    <div class="info-content">
+                        <h4>Flexible Date Planning</h4>
+                        <p>Don't worry about getting the perfect dates now. After creating your trip, you can suggest multiple date ranges and let everyone vote on their preferences!</p>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                        <span class="btn-icon">←</span>
+                        Back
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(4)">
+                        Next: Invites
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Initial Invitees -->
+            <div class="form-step" id="step-4">
+                <div class="step-header">
+                    <h2>Who's coming along?</h2>
+                    <p>Invite people now or skip this step and invite them later</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="{{ form.initial_invitees.id }}" class="form-label">
+                            <span class="label-text">{{ form.initial_invitees.label.text }}</span>
+                        </label>
+                        {{ form.initial_invitees(class="form-textarea", placeholder="john@email.com, jane@email.com, friend@example.com", rows="4") }}
+                        <div class="form-hint">Enter email addresses separated by commas. All invitees will be added as trip members.</div>
+                        {% if form.initial_invitees.errors %}
+                            <div class="form-error">
+                                {% for error in form.initial_invitees.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="invite-preview" id="invitePreview" style="display: none;">
+                    <h4>Invitation Preview</h4>
+                    <div class="preview-emails" id="previewEmails"></div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-icon">📧</div>
+                    <div class="info-content">
+                        <h4>How Invitations Work</h4>
+                        <ul>
+                            <li>Invitees receive an email with a link to join your trip</li>
+                            <li>They can view trip details and participate in planning</li>
+                            <li>You can invite more people anytime from the trip page</li>
+                            <li>Invitations expire after 30 days for security</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                        <span class="btn-icon">←</span>
+                        Back
+                    </button>
+                    <button type="button" class="btn btn-tertiary" onclick="skipInvites()">
+                        Skip for now
+                    </button>
+                    {{ form.submit(class="btn btn-success", id="submitBtn") }}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+
+function nextStep(stepNumber) {
+    if (!validateCurrentStep()) {
+        return;
+    }
+    
+    showStep(stepNumber);
+}
+
+function prevStep(stepNumber) {
+    showStep(stepNumber);
+}
+
+function showStep(stepNumber) {
+    // Hide current step
+    document.querySelector('.form-step.active').classList.remove('active');
+    
+    // Show target step
+    document.getElementById(`step-${stepNumber}`).classList.add('active');
+    
+    // Update progress
+    updateProgress(stepNumber);
+    
+    // Update current step
+    currentStep = stepNumber;
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(activeStep) {
+    // Update progress fill
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = ((activeStep - 1) / (totalSteps - 1)) * 100;
+    progressFill.style.width = progressPercent + '%';
+    
+    // Update step indicators
+    document.querySelectorAll('.progress-step').forEach((step, index) => {
+        const stepNumber = index + 1;
+        if (stepNumber <= activeStep) {
+            step.classList.add('active');
+            step.classList.add('completed');
+        } else {
+            step.classList.remove('active');
+            step.classList.remove('completed');
+        }
+        
+        if (stepNumber === activeStep) {
+            step.classList.add('current');
+        } else {
+            step.classList.remove('current');
+        }
+    });
+}
+
+function validateCurrentStep() {
+    const currentStepElement = document.querySelector('.form-step.active');
+    const requiredInputs = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true;
+    
+    requiredInputs.forEach(input => {
+        if (!input.value.trim()) {
+            isValid = false;
+            input.classList.add('error');
+            
+            // Remove error class after user starts typing
+            input.addEventListener('input', function() {
+                this.classList.remove('error');
+            }, { once: true });
+        } else {
+            input.classList.remove('error');
+        }
+    });
+    
+    if (!isValid) {
+        // Show error message
+        showNotification('Please fill in all required fields before continuing.', 'error');
+    }
+    
+    return isValid;
+}
+
+function setBudget(amount) {
+    document.getElementById('estimated_budget_per_person').value = amount;
+    
+    // Visual feedback
+    document.querySelectorAll('.budget-tag').forEach(tag => tag.classList.remove('selected'));
+    event.target.classList.add('selected');
+}
+
+function skipInvites() {
+    document.getElementById('initial_invitees').value = '';
+    document.getElementById('createTripForm').submit();
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Remove notification
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 3000);
+}
+
+// Calculate trip duration
+function updateDuration() {
+    const startDate = document.getElementById('suggested_start_date').value;
+    const endDate = document.getElementById('suggested_end_date').value;
+    
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        
+        if (diffDays > 0) {
+            document.querySelector('.duration-days').textContent = `${diffDays} days`;
+            document.getElementById('durationDisplay').style.display = 'flex';
+        }
+    } else {
+        document.getElementById('durationDisplay').style.display = 'none';
+    }
+}
+
+// Preview invitees
+function updateInvitePreview() {
+    const inviteesText = document.getElementById('initial_invitees').value;
+    const emails = inviteesText.split(',').map(email => email.trim()).filter(email => email);
+    
+    if (emails.length > 0) {
+        const previewHtml = emails.map(email => `<span class="email-tag">${email}</span>`).join('');
+        document.getElementById('previewEmails').innerHTML = previewHtml;
+        document.getElementById('invitePreview').style.display = 'block';
+    } else {
+        document.getElementById('invitePreview').style.display = 'none';
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Date change listeners
+    document.getElementById('suggested_start_date').addEventListener('change', updateDuration);
+    document.getElementById('suggested_end_date').addEventListener('change', updateDuration);
+    
+    // Invitees change listener
+    document.getElementById('initial_invitees').addEventListener('input', updateInvitePreview);
+    
+    // Form submission
+    document.getElementById('createTripForm').addEventListener('submit', function(e) {
+        if (!validateCurrentStep()) {
+            e.preventDefault();
+        }
+    });
+    
+    // Initialize progress
+    updateProgress(1);
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        if (currentStep < totalSteps) {
+            nextStep(currentStep + 1);
+        }
+    }
+});
+</script>
 {% endblock %}

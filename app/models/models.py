@@ -32,6 +32,15 @@ class Trip(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     organizer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Enhanced trip details
+    destination = db.Column(db.String(200))
+    estimated_budget_per_person = db.Column(db.Float)
+    trip_type = db.Column(db.String(50), default='vacation')  # vacation, business, adventure, family, etc.
+    privacy_level = db.Column(db.String(20), default='private')  # public, private, invite-only
+    image_url = db.Column(db.String(500))
+    
+    # Existing fields
     timezone = db.Column(db.String(50), default='America/Chicago')
     max_participants = db.Column(db.Integer, default=12)
     final_start_date = db.Column(db.DateTime)
@@ -81,6 +90,7 @@ class HousingOption(db.Model):
     estimated_price = db.Column(db.Float)
     listing_link = db.Column(db.String(500))
     description = db.Column(db.Text)
+    image_url = db.Column(db.String(500))  # New field for photo upload
     suggested_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -102,6 +112,7 @@ class ActivityOption(db.Model):
     trip_id = db.Column(db.Integer, db.ForeignKey('trip.id'), nullable=False)
     name = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
+    image_url = db.Column(db.String(500))  # New field for photo upload
     suggested_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
