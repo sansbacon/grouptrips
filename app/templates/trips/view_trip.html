@@ -101,10 +101,15 @@
             <h3 class="section-title">
                 📅 Suggested Dates
             </h3>
+            {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+            <button class="btn-travel btn-primary-travel suggest-btn" data-target="date-form">
+                ➕ Suggest New Date
+            </button>
+            {% endif %}
         </div>
 
         {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
-        <div class="suggestion-form">
+        <div class="suggestion-form" id="date-form" style="display: none;">
             <h4 style="margin-bottom: 1rem; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem;">
                 ➕ Suggest New Dates
             </h4>
@@ -120,7 +125,12 @@
                         {{ date_form.end_date(class="form-control-travel") }}
                     </div>
                 </div>
-                {{ date_form.submit(class="btn-travel btn-primary-travel") }}
+                <div style="display: flex; gap: 0.5rem;">
+                    {{ date_form.submit(class="btn-travel btn-primary-travel") }}
+                    <button type="button" class="btn-travel btn-secondary-travel cancel-btn" data-target="date-form">
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
         {% endif %}
@@ -170,26 +180,112 @@
                 </div>
 
                 <div class="comments-section">
-                    <h6 style="margin-bottom: 0.75rem; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem;">
-                        💬 Comments
-                    </h6>
-                    {% for comment in comments if comment.associated_item_type == 'suggested_date' and comment.associated_item_id == date.id %}
-                    <div class="comment">
-                        <div class="comment-author">{{ comment.user.display_name or comment.user.username }}</div>
-                        <div class="comment-content">{{ comment.content }}</div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <h6 style="margin: 0; color: var(--gray-700); display: flex; align-items: center; gap: 0.5rem;">
+                            💬 Comments
+                        </h6>
+                        {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                        <button class="btn-travel btn-secondary-travel comment-add-btn" data-target="comment-form-date-{{ date.id }}" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                            ➕ Add Comment
+                        </button>
+                        {% endif %}
                     </div>
-                    {% endfor %}
                     
-                    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
-                    <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}" style="margin-top: 0.75rem;">
-                        {{ comment_form.hidden_tag() }}
-                        {{ comment_form.associated_item_type(value='suggested_date') }}
-                        {{ comment_form.associated_item_id(value=date.id) }}
-                        <div class="form-group-travel">
-                            {{ comment_form.content(class="form-control-travel", rows=2, placeholder="Add a comment...") }}
+                    <!-- Comments Display (Read-only) -->
+                    <div class="comments-display">
+                        {% set date_comments = comments|selectattr('associated_item_type', 'equalto', 'suggested_date')|selectattr('associated_item_id', 'equalto', date.id)|list %}
+                        {% if date_comments %}
+                            <!-- Display main comments (no parent) -->
+                            {% for comment in date_comments %}
+                                {% if not comment.parent_comment_id %}
+                                <div class="comment-thread">
+                                    <!-- Main Comment -->
+                                    <div class="comment main-comment" data-comment-id="{{ comment.id }}">
+                                        <div class="comment-header">
+                                            <div class="comment-author">{{ comment.user.display_name or comment.user.username }}</div>
+                                            <div class="comment-meta">
+                                                <span class="comment-time">{{ comment.created_at.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                                                {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                                                <button class="comment-reply-btn" data-comment-id="{{ comment.id }}" data-target="reply-form-{{ comment.id }}" title="Reply">
+                                                    💬 Reply
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="comment-content">{{ comment.content }}</div>
+                                        
+                                        <!-- Reply Form (Hidden by default) -->
+                                        {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                                        <div class="reply-form" id="reply-form-{{ comment.id }}" style="display: none; margin-top: 0.5rem;">
+                                            {% set reply_comment_form = comment_forms[date.id] if comment_forms and date.id in comment_forms else comment_form %}
+                                            <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+                                                {{ reply_comment_form.hidden_tag() }}
+                                                {{ reply_comment_form.associated_item_type(value="suggested_date") }}
+                                                {{ reply_comment_form.associated_item_id(value=date.id) }}
+                                                {{ reply_comment_form.parent_comment_id(value=comment.id) }}
+                                                <div class="form-group-travel">
+                                                    <textarea name="comment-{{ date.id }}-content" class="form-control-travel" rows="2" placeholder="Reply to {{ comment.user.display_name or comment.user.username }}..." required></textarea>
+                                                </div>
+                                                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                                    <input type="submit" name="comment-{{ date.id }}-submit" value="Reply" class="btn-travel btn-secondary-travel" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                    <button type="button" class="btn-travel btn-outline-travel cancel-reply-btn" data-target="reply-form-{{ comment.id }}" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Display Replies for this comment -->
+                                    {% set replies = date_comments|selectattr('parent_comment_id', 'equalto', comment.id)|list %}
+                                    {% if replies %}
+                                    <div class="comment-replies">
+                                        {% for reply in replies %}
+                                        <div class="comment comment-reply" data-comment-id="{{ reply.id }}">
+                                            <div class="comment-header">
+                                                <div class="comment-author">{{ reply.user.display_name or reply.user.username }}</div>
+                                                <div class="comment-meta">
+                                                    <span class="comment-time">{{ reply.created_at.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                                                    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                                                    <button class="comment-reply-btn" data-comment-id="{{ comment.id }}" data-target="reply-form-{{ comment.id }}" title="Reply to thread">
+                                                        💬 Reply
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="comment-content">{{ reply.content }}</div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                        <div class="no-comments" style="color: var(--gray-500); font-style: italic; text-align: center; padding: 1rem;">
+                            No comments yet. Be the first to share your thoughts!
                         </div>
-                        {{ comment_form.submit(class="btn-travel btn-secondary-travel", style="font-size: 0.875rem; padding: 0.5rem 1rem;") }}
-                    </form>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- New Comment Form (Hidden by default) -->
+                    {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+                    <div class="comment-form" id="comment-form-date-{{ date.id }}" style="display: none; margin-top: 0.75rem;">
+                        {% set date_comment_form = comment_forms[date.id] if comment_forms and date.id in comment_forms else comment_form %}
+                        <form method="POST" action="{{ url_for('trips.view_trip', trip_id=trip.id) }}">
+                            {{ date_comment_form.hidden_tag() }}
+                            <div class="form-group-travel">
+                                {{ date_comment_form.content(class="form-control-travel", rows=3, placeholder="Share your thoughts about these dates...") }}
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                {{ date_comment_form.submit(class="btn-travel btn-secondary-travel", style="font-size: 0.875rem; padding: 0.5rem 1rem;") }}
+                                <button type="button" class="btn-travel btn-outline-travel cancel-comment-btn" data-target="comment-form-date-{{ date.id }}" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -209,10 +305,15 @@
             <h3 class="section-title">
                 🏠 Housing Options
             </h3>
+            {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+            <button class="btn-travel btn-primary-travel suggest-btn" data-target="housing-form">
+                ➕ Suggest Housing
+            </button>
+            {% endif %}
         </div>
 
         {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
-        <div class="suggestion-form">
+        <div class="suggestion-form" id="housing-form" style="display: none;">
             <h4 style="margin-bottom: 1rem; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem;">
                 ➕ Suggest Housing Option
             </h4>
@@ -247,7 +348,12 @@
                     {{ housing_form.image(class="form-control-travel") }}
                     <small style="color: var(--gray-500); font-size: 0.875rem;">📸 Upload a photo (JPG, PNG, GIF - optional)</small>
                 </div>
-                {{ housing_form.submit(class="btn-travel btn-primary-travel") }}
+                <div style="display: flex; gap: 0.5rem;">
+                    {{ housing_form.submit(class="btn-travel btn-primary-travel") }}
+                    <button type="button" class="btn-travel btn-secondary-travel cancel-btn" data-target="housing-form">
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
         {% endif %}
@@ -368,10 +474,15 @@
             <h3 class="section-title">
                 🎯 Activities
             </h3>
+            {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
+            <button class="btn-travel btn-primary-travel suggest-btn" data-target="activity-form">
+                ➕ Suggest Activity
+            </button>
+            {% endif %}
         </div>
 
         {% if trip.members|selectattr('user_id', 'equalto', session['user_id'])|first and (trip.members|selectattr('user_id', 'equalto', session['user_id'])|first).role in ['organizer', 'member'] %}
-        <div class="suggestion-form">
+        <div class="suggestion-form" id="activity-form" style="display: none;">
             <h4 style="margin-bottom: 1rem; color: var(--gray-800); display: flex; align-items: center; gap: 0.5rem;">
                 ➕ Suggest Activity
             </h4>
@@ -392,7 +503,12 @@
                     {{ activity_form.image(class="form-control-travel") }}
                     <small style="color: var(--gray-500); font-size: 0.875rem;">📸 Upload a photo (JPG, PNG, GIF - optional)</small>
                 </div>
-                {{ activity_form.submit(class="btn-travel btn-primary-travel") }}
+                <div style="display: flex; gap: 0.5rem;">
+                    {{ activity_form.submit(class="btn-travel btn-primary-travel") }}
+                    <button type="button" class="btn-travel btn-secondary-travel cancel-btn" data-target="activity-form">
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
         {% endif %}
@@ -503,6 +619,67 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 100);
     });
 
+    // Handle suggest button clicks to show forms
+    const suggestButtons = document.querySelectorAll('.suggest-btn');
+    suggestButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetForm = document.getElementById(targetId);
+            
+            if (targetForm) {
+                // Hide all other forms first
+                const allForms = document.querySelectorAll('.suggestion-form');
+                allForms.forEach(form => {
+                    if (form.id !== targetId) {
+                        form.style.display = 'none';
+                    }
+                });
+                
+                // Show the target form with animation
+                targetForm.style.display = 'block';
+                targetForm.style.opacity = '0';
+                targetForm.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    targetForm.style.transition = 'all 0.3s ease';
+                    targetForm.style.opacity = '1';
+                    targetForm.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // Hide the suggest button
+                this.style.display = 'none';
+                
+                // Scroll to the form
+                targetForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+    });
+
+    // Handle cancel button clicks to hide forms
+    const cancelButtons = document.querySelectorAll('.cancel-btn');
+    cancelButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetForm = document.getElementById(targetId);
+            const suggestBtn = document.querySelector(`[data-target="${targetId}"]`);
+            
+            if (targetForm) {
+                // Hide the form with animation
+                targetForm.style.transition = 'all 0.3s ease';
+                targetForm.style.opacity = '0';
+                targetForm.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    targetForm.style.display = 'none';
+                    // Show the suggest button again
+                    if (suggestBtn) {
+                        suggestBtn.style.display = 'inline-flex';
+                    }
+                }, 300);
+            }
+        });
+    });
+
     // Add loading state to forms
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
@@ -523,6 +700,143 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         btn.addEventListener('mouseleave', function() {
             this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Add hover effects to suggest buttons
+    const allSuggestButtons = document.querySelectorAll('.suggest-btn');
+    allSuggestButtons.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-1px)';
+            this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        });
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '';
+        });
+    });
+
+    // Handle comment add button clicks
+    const commentAddButtons = document.querySelectorAll('.comment-add-btn');
+    commentAddButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetForm = document.getElementById(targetId);
+            
+            if (targetForm) {
+                // Show the comment form with animation
+                targetForm.style.display = 'block';
+                targetForm.style.opacity = '0';
+                targetForm.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    targetForm.style.transition = 'all 0.3s ease';
+                    targetForm.style.opacity = '1';
+                    targetForm.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // Hide the add comment button
+                this.style.display = 'none';
+                
+                // Focus on the textarea
+                const textarea = targetForm.querySelector('textarea');
+                if (textarea) {
+                    setTimeout(() => textarea.focus(), 300);
+                }
+            }
+        });
+    });
+
+    // Handle comment cancel button clicks
+    const cancelCommentButtons = document.querySelectorAll('.cancel-comment-btn');
+    cancelCommentButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetForm = document.getElementById(targetId);
+            const addBtn = document.querySelector(`[data-target="${targetId}"]`);
+            
+            if (targetForm) {
+                // Hide the form with animation
+                targetForm.style.transition = 'all 0.3s ease';
+                targetForm.style.opacity = '0';
+                targetForm.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    targetForm.style.display = 'none';
+                    // Show the add comment button again
+                    if (addBtn && addBtn.classList.contains('comment-add-btn')) {
+                        addBtn.style.display = 'inline-flex';
+                    }
+                }, 300);
+                
+                // Clear the textarea
+                const textarea = targetForm.querySelector('textarea');
+                if (textarea) {
+                    textarea.value = '';
+                }
+            }
+        });
+    });
+
+    // Handle reply button clicks
+    const replyButtons = document.querySelectorAll('.comment-reply-btn');
+    replyButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetForm = document.getElementById(targetId);
+            
+            if (targetForm) {
+                // Hide all other reply forms first
+                const allReplyForms = document.querySelectorAll('.reply-form');
+                allReplyForms.forEach(form => {
+                    if (form.id !== targetId) {
+                        form.style.display = 'none';
+                    }
+                });
+                
+                // Show the reply form with animation
+                targetForm.style.display = 'block';
+                targetForm.style.opacity = '0';
+                targetForm.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    targetForm.style.transition = 'all 0.3s ease';
+                    targetForm.style.opacity = '1';
+                    targetForm.style.transform = 'translateY(0)';
+                }, 10);
+                
+                // Focus on the textarea
+                const textarea = targetForm.querySelector('textarea');
+                if (textarea) {
+                    setTimeout(() => textarea.focus(), 300);
+                }
+            }
+        });
+    });
+
+    // Handle reply cancel button clicks
+    const cancelReplyButtons = document.querySelectorAll('.cancel-reply-btn');
+    cancelReplyButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const targetForm = document.getElementById(targetId);
+            
+            if (targetForm) {
+                // Hide the form with animation
+                targetForm.style.transition = 'all 0.3s ease';
+                targetForm.style.opacity = '0';
+                targetForm.style.transform = 'translateY(-10px)';
+                
+                setTimeout(() => {
+                    targetForm.style.display = 'none';
+                }, 300);
+                
+                // Clear the textarea
+                const textarea = targetForm.querySelector('textarea');
+                if (textarea) {
+                    textarea.value = '';
+                }
+            }
         });
     });
 });

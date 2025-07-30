@@ -12,8 +12,8 @@
             <form method="POST" style="text-align: left;">
                 {{ form.hidden_tag() }}
                 <div class="form-group-travel">
-                    <label class="form-label-travel" for="{{ form.email.id }}">{{ form.email.label.text }}</label>
-                    {{ form.email(class="form-control-travel", placeholder="Enter your email address") }}
+                    <label class="form-label-travel" for="{{ form.username_or_email.id }}">{{ form.username_or_email.label.text }}</label>
+                    {{ form.username_or_email(class="form-control-travel", placeholder="Enter your username or email") }}
                 </div>
                 
                 <div class="form-group-travel">

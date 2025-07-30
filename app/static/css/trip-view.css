@@ -220,16 +220,16 @@
   border-top: 1px solid var(--gray-200);
 }
 
+/* Base comment styles - will be overridden by specific classes */
 .comment {
-  background: white;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: var(--radius-md);
   margin-bottom: 0.5rem;
-  border-left: 3px solid var(--primary-blue);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .comment-author {
-  font-weight: 500;
+  font-weight: 600;
   color: var(--gray-800);
   margin-bottom: 0.25rem;
 }
@@ -237,6 +237,7 @@
 .comment-content {
   color: var(--gray-700);
   font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 /* Forms */
@@ -339,4 +340,281 @@
 .status-inactive {
   background: var(--gray-300);
   color: var(--gray-700);
+}
+
+/* Suggest Buttons */
+.suggest-btn {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.suggest-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.suggest-btn:active {
+  transform: translateY(0);
+}
+
+/* Form Animation */
+.suggestion-form {
+  transition: all 0.3s ease;
+}
+
+.suggestion-form.show {
+  display: block !important;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.suggestion-form.hide {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Enhanced Section Headers */
+.section-header {
+  position: relative;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--primary-blue), transparent);
+}
+
+/* Loading Button State */
+.loading-button {
+  position: relative;
+  color: transparent !important;
+}
+
+.loading-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Enhanced Empty States */
+.empty-state {
+  background: linear-gradient(135deg, var(--gray-50), var(--gray-100));
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--gray-300);
+}
+
+.empty-state:hover {
+  border-color: var(--primary-blue);
+  background: linear-gradient(135deg, var(--primary-blue-light), var(--gray-100));
+}
+
+/* Improved Form Styling */
+.suggestion-form {
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Cancel Button Styling */
+.cancel-btn {
+  background: var(--gray-200);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+}
+
+.cancel-btn:hover {
+  background: var(--gray-300);
+  color: var(--gray-800);
+  text-decoration: none;
+}
+
+/* Enhanced Comments System */
+.comments-display {
+  margin-bottom: 1rem;
+}
+
+.comment-thread {
+  margin-bottom: 1rem;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.comment-time {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.comment-reply-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.comment-reply-btn:hover {
+  background: var(--gray-100);
+}
+
+/* Main comment styling */
+.main-comment {
+  background: white !important;
+  border-left: 3px solid var(--primary-blue) !important;
+  margin-left: 0 !important;
+}
+
+/* Reply comment styling with threading */
+.comment-reply {
+  background: #fff5e6 !important;
+  border-left: 3px solid #ff8c00 !important;
+  border: 2px solid rgba(255, 140, 0, 0.3) !important;
+  margin-left: 0 !important;
+  margin-top: 0.5rem !important;
+  position: relative !important;
+}
+
+/* Make replies visually very different */
+.comment-replies .comment-reply {
+  background: linear-gradient(135deg, #fff5e6, #ffe4cc) !important;
+  border-left: 4px solid #ff8c00 !important;
+  border-radius: 8px !important;
+  box-shadow: inset 2px 0 4px rgba(255, 140, 0, 0.1) !important;
+  transform: translateX(10px) !important;
+}
+
+.comment-replies .comment-reply::before {
+  content: "↳ REPLY" !important;
+  position: absolute !important;
+  top: -8px !important;
+  left: 8px !important;
+  background: #ff8c00 !important;
+  color: white !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+}
+
+.comment-replies {
+  margin-left: 2rem;
+  margin-top: 0.75rem;
+  border-left: 3px solid var(--gray-300);
+  padding-left: 1.5rem;
+  position: relative;
+  background: linear-gradient(to right, rgba(255, 165, 0, 0.05), transparent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.comment-replies::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--secondary-orange), var(--gray-300));
+}
+
+.reply-indicator {
+  color: var(--secondary-orange);
+  font-weight: bold;
+  font-size: 1.2rem;
+  line-height: 1;
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}
+
+.reply-content {
+  flex: 1;
+}
+
+.reply-form {
+  background: var(--gray-50);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+}
+
+.comment-form {
+  background: var(--gray-50);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+}
+
+.comment-add-btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.cancel-comment-btn,
+.cancel-reply-btn {
+  background: var(--gray-200);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.cancel-comment-btn:hover,
+.cancel-reply-btn:hover {
+  background: var(--gray-300);
+  color: var(--gray-800);
+  text-decoration: none;
+}
+
+.no-comments {
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px dashed var(--gray-300);
+}
+
+/* Button Outline Style */
+.btn-outline-travel {
+  background: transparent;
+  border: 1px solid var(--gray-300);
+  color: var(--gray-700);
+}
+
+.btn-outline-travel:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+  color: var(--gray-800);
+  text-decoration: none;
 }

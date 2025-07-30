@@ -311,83 +311,164 @@ def view_trip(trip_id):
     housing_form = HousingOptionForm(prefix='housing')
     activity_form = ActivityOptionForm(prefix='activity')
     comment_form = CommentForm(prefix='comment')
+    
+    # Get suggested dates first to create individual comment forms
+    suggested_dates = SuggestedDate.query.filter_by(trip_id=trip.id).all()
+    comment_forms = {}
+    for date in suggested_dates:
+        comment_forms[date.id] = CommentForm(prefix=f'comment-{date.id}')
 
-    if date_form.validate_on_submit() and date_form.submit.data:
-        user_id = session['user_id']
-        suggested_date = SuggestedDate(
-            trip_id=trip.id,
-            start_date=datetime.combine(date_form.start_date.data, datetime.min.time()),
-            end_date=datetime.combine(date_form.end_date.data, datetime.min.time()),
-            created_by=user_id
-        )
-        db.session.add(suggested_date)
-        db.session.commit()
-        flash('Date suggested successfully!', 'success')
-        return redirect(url_for('trips.view_trip', trip_id=trip.id))
+    # Check which form was submitted by looking at the submit button name
+    if request.method == 'POST':
+        # Debug: Print all form data to see what's being submitted
+        print("Form data:", dict(request.form))
+        
+        # Check for date form submission by looking for date form fields
+        if 'date-start_date' in request.form and 'date-end_date' in request.form:
+            print("Date form submitted!")
+            print("Form validation result:", date_form.validate())
+            if date_form.errors:
+                print("Form errors:", date_form.errors)
+            
+            if date_form.validate():
+                user_id = session['user_id']
+                suggested_date = SuggestedDate(
+                    trip_id=trip.id,
+                    start_date=datetime.combine(date_form.start_date.data, datetime.min.time()),
+                    end_date=datetime.combine(date_form.end_date.data, datetime.min.time()),
+                    created_by=user_id
+                )
+                db.session.add(suggested_date)
+                db.session.commit()
+                flash('Date suggested successfully!', 'success')
+                return redirect(url_for('trips.view_trip', trip_id=trip.id))
+            else:
+                flash('Please check the form for errors.', 'error')
 
-    if housing_form.validate_on_submit() and housing_form.submit.data:
-        user_id = session['user_id']
-        
-        # Handle image upload
-        image_url = None
-        if housing_form.image.data:
-            image_url = save_uploaded_file(housing_form.image.data, 'housing')
-        
-        housing_option = HousingOption(
-            trip_id=trip.id,
-            name=housing_form.name.data,
-            location=housing_form.location.data,
-            estimated_price=housing_form.estimated_price.data,
-            listing_link=housing_form.listing_link.data,
-            description=housing_form.description.data,
-            image_url=image_url,
-            suggested_by_user_id=user_id
-        )
-        db.session.add(housing_option)
-        db.session.commit()
-        flash('Housing option suggested successfully!', 'success')
-        return redirect(url_for('trips.view_trip', trip_id=trip.id))
+        # Check for housing form submission
+        elif 'housing-submit' in request.form and housing_form.validate():
+            user_id = session['user_id']
+            
+            # Handle image upload
+            image_url = None
+            if housing_form.image.data:
+                image_url = save_uploaded_file(housing_form.image.data, 'housing')
+            
+            housing_option = HousingOption(
+                trip_id=trip.id,
+                name=housing_form.name.data,
+                location=housing_form.location.data,
+                estimated_price=housing_form.estimated_price.data,
+                listing_link=housing_form.listing_link.data,
+                description=housing_form.description.data,
+                image_url=image_url,
+                suggested_by_user_id=user_id
+            )
+            db.session.add(housing_option)
+            db.session.commit()
+            flash('Housing option suggested successfully!', 'success')
+            return redirect(url_for('trips.view_trip', trip_id=trip.id))
 
-    if activity_form.validate_on_submit() and activity_form.submit.data:
-        user_id = session['user_id']
-        
-        # Handle image upload
-        image_url = None
-        if activity_form.image.data:
-            image_url = save_uploaded_file(activity_form.image.data, 'activities')
-        
-        activity_option = ActivityOption(
-            trip_id=trip.id,
-            name=activity_form.name.data,
-            description=activity_form.description.data,
-            image_url=image_url,
-            suggested_by_user_id=user_id
-        )
-        db.session.add(activity_option)
-        db.session.commit()
-        flash('Activity option suggested successfully!', 'success')
-        return redirect(url_for('trips.view_trip', trip_id=trip.id))
+        # Check for activity form submission
+        elif 'activity-submit' in request.form and activity_form.validate():
+            user_id = session['user_id']
+            
+            # Handle image upload
+            image_url = None
+            if activity_form.image.data:
+                image_url = save_uploaded_file(activity_form.image.data, 'activities')
+            
+            activity_option = ActivityOption(
+                trip_id=trip.id,
+                name=activity_form.name.data,
+                description=activity_form.description.data,
+                image_url=image_url,
+                suggested_by_user_id=user_id
+            )
+            db.session.add(activity_option)
+            db.session.commit()
+            flash('Activity option suggested successfully!', 'success')
+            return redirect(url_for('trips.view_trip', trip_id=trip.id))
 
-    if comment_form.validate_on_submit() and comment_form.submit.data:
-        user_id = session['user_id']
-        comment = Comment(
-            user_id=user_id,
-            trip_id=trip.id,
-            content=comment_form.content.data,
-            parent_comment_id=comment_form.parent_comment_id.data or None,
-            associated_item_type=comment_form.associated_item_type.data,
-            associated_item_id=comment_form.associated_item_id.data
-        )
-        db.session.add(comment)
-        db.session.commit()
-        flash('Comment added successfully!', 'success')
-        return redirect(url_for('trips.view_trip', trip_id=trip.id))
+        # Check for comment form submission - look for any comment form
+        else:
+            # Check if any comment form was submitted
+            for date_id, form in comment_forms.items():
+                form_prefix = f'comment-{date_id}'
+                if f'{form_prefix}-content' in request.form:
+                    print(f"Comment form for date {date_id} detected!")
+                    print("Form validation result:", form.validate())
+                    print("Form errors:", form.errors)
+                    print("All form data:", dict(request.form))
+                    
+                    if form.validate():
+                        user_id = session['user_id']
+                        
+                        # Check if this is a reply by looking for parent_comment_id in the form data
+                        parent_comment_id = None
+                        
+                        # Debug: Print all form fields to see exact field names
+                        print("ALL FORM FIELDS:")
+                        for key, value in request.form.items():
+                            print(f"  {key}: {value}")
+                        
+                        # Try multiple possible field names for parent_comment_id
+                        possible_parent_fields = [
+                            f'{form_prefix}-parent_comment_id',
+                            'parent_comment_id',
+                            f'comment-{date_id}-parent_comment_id'
+                        ]
+                        
+                        for field_name in possible_parent_fields:
+                            if field_name in request.form and request.form[field_name]:
+                                try:
+                                    parent_comment_id = int(request.form[field_name])
+                                    print(f"Found parent_comment_id: {parent_comment_id} from field: {field_name}")
+                                    break
+                                except (ValueError, TypeError):
+                                    continue
+                        
+                        # Also check the form object's parent_comment_id field
+                        if hasattr(form, 'parent_comment_id') and form.parent_comment_id.data:
+                            try:
+                                parent_comment_id = int(form.parent_comment_id.data)
+                                print(f"Found parent_comment_id from form object: {parent_comment_id}")
+                            except (ValueError, TypeError):
+                                pass
+                        
+                        # Debug: Print all form fields containing 'parent'
+                        print("All form fields containing 'parent':")
+                        for key, value in request.form.items():
+                            if 'parent' in key.lower():
+                                print(f"  {key}: {value}")
+                        
+                        print(f"Final parent_comment_id: {parent_comment_id}")
+                        
+                        comment = Comment(
+                            user_id=user_id,
+                            trip_id=trip.id,
+                            content=form.content.data,
+                            parent_comment_id=parent_comment_id,
+                            associated_item_type='suggested_date',
+                            associated_item_id=date_id
+                        )
+                        db.session.add(comment)
+                        db.session.commit()
+                        
+                        if parent_comment_id:
+                            flash('Reply added successfully!', 'success')
+                        else:
+                            flash('Comment added successfully!', 'success')
+                        return redirect(url_for('trips.view_trip', trip_id=trip.id))
+                    else:
+                        flash('Comment form validation failed. Please check your input.', 'error')
+                    break
 
     suggested_dates = SuggestedDate.query.filter_by(trip_id=trip.id).all()
     housing_options = HousingOption.query.filter_by(trip_id=trip.id).all()
     activity_options = ActivityOption.query.filter_by(trip_id=trip.id).all()
     comments = Comment.query.filter_by(trip_id=trip.id).order_by(Comment.created_at.asc()).all()
-    return render_template('trips/view_trip.html', trip=trip, date_form=date_form, housing_form=housing_form, activity_form=activity_form, comment_form=comment_form, suggested_dates=suggested_dates, housing_options=housing_options, activity_options=activity_options, comments=comments)
+    return render_template('trips/view_trip.html', trip=trip, date_form=date_form, housing_form=housing_form, activity_form=activity_form, comment_form=comment_form, comment_forms=comment_forms, suggested_dates=suggested_dates, housing_options=housing_options, activity_options=activity_options, comments=comments)
 
 @trips.route('/vote_date/<int:suggested_date_id>/<vote_type>')
 @login_required

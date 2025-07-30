@@ -15,7 +15,7 @@ auth = Blueprint('auth', __name__)
 
 class LoginForm(FlaskForm):
     """Form for user login."""
-    email = StringField('Email', validators=[DataRequired()])
+    username_or_email = StringField('Username or Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[])
     submit = SubmitField('Login')
 
@@ -31,15 +31,19 @@ class RegisterForm(FlaskForm):
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    """Login page - handles both email-only and email+password login."""
+    """Login page - handles both username and email login with password."""
     form = LoginForm()
     if form.validate_on_submit():
-        email = form.email.data.lower().strip()
+        username_or_email = form.username_or_email.data.strip()
         password = form.password.data
         
-        user = User.query.filter_by(email=email).first()
+        # Try to find user by username first, then by email
+        user = User.query.filter_by(username=username_or_email).first()
         if not user:
-            flash('No account found with that email address. Please register first.', 'error')
+            user = User.query.filter_by(email=username_or_email.lower()).first()
+        
+        if not user:
+            flash('No account found with that username or email. Please register first.', 'error')
             return redirect(url_for('auth.register'))
         
         # If password is provided, check for local account login
@@ -56,7 +60,7 @@ def login():
                 else:
                     return redirect(url_for('trips.dashboard'))
             else:
-                flash('Invalid email or password.', 'error')
+                flash('Invalid username/email or password.', 'error')
                 return render_template('auth/login.html', form=form)
         else:
             # Email-only login for non-local accounts
